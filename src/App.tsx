@@ -24,6 +24,7 @@ import { useFactionStore } from './stores/factionStore';
 import { AchievementToast } from './components/achievements/AchievementToast';
 import { InstallPrompt } from './components/pwa/InstallPrompt';
 import { OfflineBanner } from './components/pwa/OfflineBanner';
+import { TutorialOverlay } from './components/tutorial/TutorialOverlay';
 
 // Lazy-loaded screens
 const StratagemGrid = lazy(() => import('./components/stratagem/StratagemGrid').then(m => ({ default: m.StratagemGrid })));
@@ -31,6 +32,7 @@ const SettingsPanel = lazy(() => import('./components/settings/SettingsPanel').t
 const StatsOverview = lazy(() => import('./components/stats/StatsOverview').then(m => ({ default: m.StatsOverview })));
 const LeaderboardScreen = lazy(() => import('./components/leaderboard/LeaderboardScreen').then(m => ({ default: m.LeaderboardScreen })));
 const AchievementsScreen = lazy(() => import('./components/achievements/AchievementsScreen').then(m => ({ default: m.AchievementsScreen })));
+const HowToPlayScreen = lazy(() => import('./components/help/HowToPlayScreen').then(m => ({ default: m.HowToPlayScreen })));
 
 function shuffleArray<T>(arr: T[], rng: () => number = Math.random): T[] {
   const shuffled = [...arr];
@@ -64,6 +66,8 @@ export default function App() {
   const settings = useSettingsStore();
   const audio = useAudio();
   const activeFaction = useFactionStore((s) => s.activeFaction);
+  const hasCompletedTutorial = useSettingsStore((s) => s.hasCompletedTutorial);
+  const [showTutorial, setShowTutorial] = useState(!hasCompletedTutorial);
 
   const handleModeSelect = useCallback((mode: GameMode) => {
     audio.menuClick();
@@ -323,13 +327,28 @@ export default function App() {
               </ScreenErrorBoundary>
             </PageTransition>
           )}
+
+          {screen === 'help' && (
+            <PageTransition key="help">
+              <ScreenErrorBoundary onReset={goHome}>
+                <Suspense fallback={<LoadingSkeleton lines={4} />}>
+                  <HowToPlayScreen onClose={goHome} />
+                </Suspense>
+              </ScreenErrorBoundary>
+            </PageTransition>
+          )}
         </AnimatePresence>
       </main>
+
+      {/* Tutorial overlay (first visit only) */}
+      <AnimatePresence>
+        {showTutorial && <TutorialOverlay onComplete={() => setShowTutorial(false)} />}
+      </AnimatePresence>
 
       <AchievementToast />
       <OfflineBanner />
       <InstallPrompt />
-      <Footer />
+      <Footer onHelp={() => setScreen('help')} />
     </div>
   );
 }

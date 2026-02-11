@@ -27,9 +27,11 @@ const defaultSettings: UserSettings = {
   reducedMotion: false,
   timeAttackDuration: 60,
   accuracyTargetCount: 20,
+  hasCompletedTutorial: false,
 };
 
 interface SettingsState extends UserSettings {
+  completeTutorial: () => void;
   setVolume: (volume: number) => void;
   toggleSfx: () => void;
   toggleMusic: () => void;
@@ -55,6 +57,7 @@ function persistAll(state: UserSettings) {
     reducedMotion: state.reducedMotion,
     timeAttackDuration: state.timeAttackDuration,
     accuracyTargetCount: state.accuracyTargetCount,
+    hasCompletedTutorial: state.hasCompletedTutorial,
   });
 }
 
@@ -115,6 +118,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
 
     setTimeAttackDuration: (duration) => persist({ timeAttackDuration: duration }),
     setAccuracyTargetCount: (count) => persist({ accuracyTargetCount: count }),
+
+    completeTutorial: () => persist({ hasCompletedTutorial: true }),
 
     resetToDefaults: () => {
       stopMusic();

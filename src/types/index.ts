@@ -127,6 +127,7 @@ export interface UserSettings {
   reducedMotion: boolean;
   timeAttackDuration: number;
   accuracyTargetCount: number;
+  hasCompletedTutorial: boolean;
 }
 
 /** Time attack duration options */
@@ -158,4 +159,5 @@ export type AppScreen =
   | 'settings'
   | 'leaderboard'
   | 'achievements'
-  | 'custom-builder';
+  | 'custom-builder'
+  | 'help';
