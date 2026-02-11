@@ -32,14 +32,16 @@ export function StreakFire({ multiplier, active }: StreakFireProps) {
   const faction = useFactionStore((s) => s.activeFaction);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !active || multiplier < 2) {
-      if (canvas) {
-        const ctx = canvas.getContext('2d');
-        ctx?.clearRect(0, 0, canvas.width, canvas.height);
+    const canvasEl = canvasRef.current;
+    if (!canvasEl || !active || multiplier < 2) {
+      if (canvasEl) {
+        const ctx = canvasEl.getContext('2d');
+        ctx?.clearRect(0, 0, canvasEl.width, canvasEl.height);
       }
       return;
     }
+    // After guard, canvas is guaranteed non-null
+    const canvas = canvasEl;
 
     const resize = () => {
       canvas.width = window.innerWidth;
@@ -198,7 +200,6 @@ export function StreakFire({ multiplier, active }: StreakFireProps) {
       // Edge glows — all 4 sides at x4, bottom + sides at x3
       const intensity = multiplier === 2 ? 0.06 : multiplier === 3 ? 0.14 : 0.25;
       const edgeW = multiplier === 2 ? 60 : multiplier === 3 ? 100 : 120;
-      const edgeColor = hslToRgba(hues[0], 1, 0.5, intensity);
       const pulse = Math.sin(time * 3) * 0.03;
 
       // Bottom
