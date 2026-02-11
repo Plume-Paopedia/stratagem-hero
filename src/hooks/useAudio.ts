@@ -70,6 +70,14 @@ export function useAudio() {
     if (vol > 0) audio.playOrbitalStrike(vol);
   }, [vol]);
 
+  const letterTick = useCallback(() => {
+    if (vol > 0) audio.playLetterTick(vol);
+  }, [vol]);
+
+  const slotConfirm = useCallback(() => {
+    if (vol > 0) audio.playSlotConfirm(vol);
+  }, [vol]);
+
   return {
     inputBeep,
     successJingle,
@@ -84,5 +92,7 @@ export function useAudio() {
     recordFanfare,
     powerSurge,
     orbitalStrike,
+    letterTick,
+    slotConfirm,
   };
 }

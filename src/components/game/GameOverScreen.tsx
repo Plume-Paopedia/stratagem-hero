@@ -3,6 +3,7 @@ import type { GameMode, StratagemAttempt } from '../../types';
 import { Button } from '../ui/Button';
 import { calculateAccuracy } from '../../utils/scoring';
 import { stratagemMap } from '../../data/stratagems';
+import { LeaderboardMini } from '../leaderboard/LeaderboardMini';
 
 interface GameOverScreenProps {
   mode: GameMode;
@@ -13,6 +14,7 @@ interface GameOverScreenProps {
   isNewRecord: boolean;
   onRestart: () => void;
   onMenu: () => void;
+  onViewLeaderboard?: () => void;
 }
 
 export function GameOverScreen({
@@ -24,6 +26,7 @@ export function GameOverScreen({
   isNewRecord,
   onRestart,
   onMenu,
+  onViewLeaderboard,
 }: GameOverScreenProps) {
   const successes = attempts.filter((a) => a.success).length;
   const accuracy = calculateAccuracy(successes, attempts.length);
@@ -90,10 +93,20 @@ export function GameOverScreen({
         )}
       </div>
 
-      <div className="flex gap-4 mt-4">
+      {/* Leaderboard mini */}
+      {mode !== 'free-practice' && (
+        <LeaderboardMini mode={mode} highlightScore={score} />
+      )}
+
+      <div className="flex gap-3 mt-4">
         <Button variant="primary" size="lg" onClick={onRestart}>
           Retry (R)
         </Button>
+        {onViewLeaderboard && (
+          <Button variant="secondary" size="lg" onClick={onViewLeaderboard}>
+            Scores
+          </Button>
+        )}
         <Button variant="secondary" size="lg" onClick={onMenu}>
           Menu (Esc)
         </Button>

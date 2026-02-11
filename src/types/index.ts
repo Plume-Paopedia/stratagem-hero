@@ -129,6 +129,17 @@ export type TimeAttackDuration = 60 | 90 | 120;
 /** Accuracy target count options */
 export type AccuracyTargetCount = 20 | 50 | 100;
 
+/** A single leaderboard entry */
+export interface LeaderboardEntry {
+  initials: string;
+  score: number;
+  bestStreak: number;
+  date: number;
+}
+
+/** All leaderboards, keyed by game mode */
+export type Leaderboards = Partial<Record<GameMode, LeaderboardEntry[]>>;
+
 /** App screen/route */
 export type AppScreen =
   | 'menu'
@@ -137,4 +148,5 @@ export type AppScreen =
   | 'game'
   | 'game-over'
   | 'stats'
-  | 'settings';
+  | 'settings'
+  | 'leaderboard';

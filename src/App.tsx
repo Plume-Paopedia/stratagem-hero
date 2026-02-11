@@ -10,6 +10,7 @@ import { GameScreen } from './components/game/GameScreen';
 import { StratagemGrid } from './components/stratagem/StratagemGrid';
 import { SettingsPanel } from './components/settings/SettingsPanel';
 import { StatsOverview } from './components/stats/StatsOverview';
+import { LeaderboardScreen } from './components/leaderboard/LeaderboardScreen';
 import { Button } from './components/ui/Button';
 import { ScanlineOverlay } from './components/ui/ScanlineOverlay';
 import { AmbientParticles } from './components/ui/AmbientParticles';
@@ -38,6 +39,7 @@ const gameModes: { id: GameMode; name: string; icon: string; desc: string }[] = 
 export default function App() {
   const [screen, setScreen] = useState<AppScreen>('menu');
   const [selectedMode, setSelectedMode] = useState<GameMode | null>(null);
+  const [leaderboardMode, setLeaderboardMode] = useState<GameMode | undefined>(undefined);
   const [selectedStratagems, setSelectedStratagems] = useState<Set<string>>(new Set());
   const [gameQueue, setGameQueue] = useState<Stratagem[]>([]);
   const settings = useSettingsStore();
@@ -107,6 +109,11 @@ export default function App() {
     setSelectedMode(null);
   }, []);
 
+  const goToLeaderboard = useCallback((mode?: GameMode) => {
+    setLeaderboardMode(mode);
+    setScreen('leaderboard');
+  }, []);
+
   const reducedMotion = useSettingsStore((s) => s.reducedMotion);
 
   return (
@@ -119,6 +126,7 @@ export default function App() {
       <Header
         onStats={() => setScreen('stats')}
         onSettings={() => setScreen('settings')}
+        onLeaderboard={() => goToLeaderboard()}
         onHome={goHome}
         showBack={screen !== 'menu'}
       />
@@ -168,6 +176,7 @@ export default function App() {
                 mode={selectedMode}
                 queue={gameQueue}
                 onExit={goHome}
+                onViewLeaderboard={goToLeaderboard}
               />
             </PageTransition>
           )}
@@ -181,6 +190,12 @@ export default function App() {
           {screen === 'settings' && (
             <PageTransition key="settings">
               <SettingsPanel onClose={goHome} />
+            </PageTransition>
+          )}
+
+          {screen === 'leaderboard' && (
+            <PageTransition key="leaderboard">
+              <LeaderboardScreen onClose={goHome} initialMode={leaderboardMode} />
             </PageTransition>
           )}
         </AnimatePresence>

@@ -8,6 +8,7 @@ import { useScreenShake } from '../../hooks/useScreenShake';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { useStatsStore } from '../../stores/statsStore';
 import { useFactionStore } from '../../stores/factionStore';
+import { useLeaderboardStore } from '../../stores/leaderboardStore';
 import { getStreakMultiplier, calculateScore, calculateAccuracy } from '../../utils/scoring';
 import { ComboDisplay } from '../stratagem/ComboDisplay';
 import { InputFeedback } from '../stratagem/InputFeedback';
@@ -16,6 +17,7 @@ import { HellpodDrop } from '../ui/HellpodDrop';
 import { StreakFire } from '../ui/StreakFire';
 import { GlitchEffect } from '../ui/GlitchEffect';
 import { StreakAnnouncement } from '../ui/StreakAnnouncement';
+import { ArcadeInitialEntry } from '../leaderboard/ArcadeInitialEntry';
 import { Countdown } from './Countdown';
 import { Timer } from './Timer';
 import { ScoreDisplay } from './ScoreDisplay';
@@ -27,13 +29,17 @@ interface GameScreenProps {
   mode: GameMode;
   queue: Stratagem[];
   onExit: () => void;
+  onViewLeaderboard?: (mode: GameMode) => void;
 }
 
-export function GameScreen({ mode, queue, onExit }: GameScreenProps) {
+export function GameScreen({ mode, queue, onExit, onViewLeaderboard }: GameScreenProps) {
   const audio = useAudio();
   const timeAttackDuration = useSettingsStore((s) => s.timeAttackDuration);
   const randomizeFaction = useFactionStore((s) => s.randomizeFaction);
   const setFaction = useFactionStore((s) => s.setFaction);
+  const qualifiesForLeaderboard = useLeaderboardStore((s) => s.qualifiesForLeaderboard);
+  const getRankForScore = useLeaderboardStore((s) => s.getRankForScore);
+  const addLeaderboardEntry = useLeaderboardStore((s) => s.addEntry);
 
   // Screen shake
   const shakeRef = useRef<HTMLDivElement>(null);
@@ -56,6 +62,8 @@ export function GameScreen({ mode, queue, onExit }: GameScreenProps) {
   const [glitchTrigger, setGlitchTrigger] = useState(0);
   const [streakAnnounceTrigger, setStreakAnnounceTrigger] = useState(0);
   const [lastCompletedName, setLastCompletedName] = useState('');
+  const [showInitialEntry, setShowInitialEntry] = useState(false);
+  const [leaderboardRank, setLeaderboardRank] = useState<number | null>(null);
   const [lives, setLives] = useState(3);
   const [survivalTimeLimit, setSurvivalTimeLimit] = useState(8000);
   const attemptStartRef = useRef(performance.now());
@@ -238,9 +246,10 @@ export function GameScreen({ mode, queue, onExit }: GameScreenProps) {
     }
   }, [isPlaying, multiplier, startContinuousShake, stopContinuousShake]);
 
-  // Keyboard shortcuts
+  // Keyboard shortcuts (blocked during initial entry)
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      if (showInitialEntry) return; // ArcadeInitialEntry handles its own keys
       if (e.code === 'Escape') {
         if (state === 'playing') {
           endGame();
@@ -254,9 +263,9 @@ export function GameScreen({ mode, queue, onExit }: GameScreenProps) {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [state, onExit, endGame]);
+  }, [state, onExit, endGame, showInitialEntry]);
 
-  // Record stats on game over
+  // Record stats on game over + check leaderboard
   useEffect(() => {
     if (state !== 'game-over') return;
     const duration = totalTimeRef.current;
@@ -274,7 +283,28 @@ export function GameScreen({ mode, queue, onExit }: GameScreenProps) {
           ? attempts.filter((a) => a.success).reduce((s, a) => s + a.timeMs, 0) / successes
           : 0,
     });
+
+    // Check if score qualifies for leaderboard
+    if (qualifiesForLeaderboard(mode, score)) {
+      const rank = getRankForScore(mode, score);
+      setLeaderboardRank(rank);
+      setShowInitialEntry(true);
+    }
   }, [state]);
+
+  const handleInitialConfirm = useCallback((initials: string) => {
+    addLeaderboardEntry(mode, {
+      initials,
+      score,
+      bestStreak,
+      date: Date.now(),
+    });
+    setShowInitialEntry(false);
+  }, [addLeaderboardEntry, mode, score, bestStreak]);
+
+  const handleInitialCancel = useCallback(() => {
+    setShowInitialEntry(false);
+  }, []);
 
   const restart = useCallback(() => {
     setCurrentIndex(0);
@@ -284,6 +314,8 @@ export function GameScreen({ mode, queue, onExit }: GameScreenProps) {
     setBestStreak(0);
     setMultiplier(1);
     setAttempts([]);
+    setShowInitialEntry(false);
+    setLeaderboardRank(null);
     setLives(3);
     setSurvivalTimeLimit(8000);
     setHellpodTrigger(0);
@@ -331,9 +363,22 @@ export function GameScreen({ mode, queue, onExit }: GameScreenProps) {
             isNewRecord={isNewRecord}
             onRestart={restart}
             onMenu={onExit}
+            onViewLeaderboard={onViewLeaderboard ? () => onViewLeaderboard(mode) : undefined}
           />
         </div>
       )}
+
+      {/* Arcade initial entry overlay */}
+      <AnimatePresence>
+        {showInitialEntry && leaderboardRank != null && (
+          <ArcadeInitialEntry
+            score={score}
+            rank={leaderboardRank}
+            onConfirm={handleInitialConfirm}
+            onCancel={handleInitialCancel}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Playing state */}
       {state === 'playing' && currentStratagem && (

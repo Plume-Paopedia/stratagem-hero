@@ -7,7 +7,7 @@ interface StreakFireProps {
   active: boolean;
 }
 
-function hslToRgba(h: number, s: number, l: number, a: number): string {
+function hslToRgb(h: number, s: number, l: number): [number, number, number] {
   const hk = h / 360;
   const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
   const p = 2 * l - q;
@@ -18,13 +18,26 @@ function hslToRgba(h: number, s: number, l: number, a: number): string {
     if (tc < 2 / 3) return p + (q - p) * (2 / 3 - tc) * 6;
     return p;
   });
-  return `rgba(${Math.round(t[0] * 255)},${Math.round(t[1] * 255)},${Math.round(t[2] * 255)},${a})`;
+  return [Math.round(t[0] * 255), Math.round(t[1] * 255), Math.round(t[2] * 255)];
+}
+
+interface Ember {
+  x: number; y: number;
+  vx: number; vy: number;
+  life: number; maxLife: number;
+  size: number; hueIdx: number;
+  alive: boolean;
+}
+
+interface Lightning {
+  points: { x: number; y: number }[];
+  life: number;
+  hueIdx: number;
 }
 
 /**
  * Fire / lightning / energy border effect based on streak multiplier.
- * x1 = nothing, x2 = ember glow, x3 = inferno, x4 = absolute hellfire with lightning.
- * Colors adapt to active faction.
+ * OPTIMIZED: object pooling, capped particles, pre-computed colors, half-res canvas.
  */
 export function StreakFire({ multiplier, active }: StreakFireProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -40,148 +53,178 @@ export function StreakFire({ multiplier, active }: StreakFireProps) {
       }
       return;
     }
-    // After guard, canvas is guaranteed non-null
     const canvas = canvasEl;
 
+    // Half-resolution rendering for performance
+    const SCALE = 0.5;
+    let w = 0, h = 0;
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      w = Math.floor(window.innerWidth * SCALE);
+      h = Math.floor(window.innerHeight * SCALE);
+      canvas.width = w;
+      canvas.height = h;
     };
     resize();
     window.addEventListener('resize', resize);
     const ctx = canvas.getContext('2d')!;
 
-    // Faction-aware color hues
+    // Pre-compute faction colors as RGB tuples
     const factionTheme = faction ? FACTIONS[faction] : null;
-    const hues = factionTheme ? factionTheme.particleHues : [30, 15, 0]; // default orange/red
+    const hues = factionTheme ? factionTheme.particleHues : [30, 15, 0];
+    const hueRgb = hues.map((h) => hslToRgb(h, 1, 0.5));
 
-    interface Ember {
-      x: number; y: number;
-      vx: number; vy: number;
-      life: number; maxLife: number;
-      size: number; hue: number;
+    // Particle pool with hard cap
+    const MAX_EMBERS = multiplier === 2 ? 120 : multiplier === 3 ? 200 : 300;
+    const pool: Ember[] = [];
+    for (let i = 0; i < MAX_EMBERS; i++) {
+      pool.push({ x: 0, y: 0, vx: 0, vy: 0, life: 0, maxLife: 1, size: 1, hueIdx: 0, alive: false });
     }
+    let aliveCount = 0;
 
-    interface Lightning {
-      points: { x: number; y: number }[];
-      life: number;
-      hue: number;
-    }
-
-    const embers: Ember[] = [];
     const lightnings: Lightning[] = [];
-    const spawnRate = multiplier === 2 ? 4 : multiplier === 3 ? 12 : 25;
+
+    // Time-based spawning instead of per-frame
+    const spawnsPerSec = multiplier === 2 ? 60 : multiplier === 3 ? 150 : 300;
+    const topSpawnsPerSec = multiplier >= 4 ? 100 : 0;
+    let spawnAccum = 0;
+    let topSpawnAccum = 0;
     let lastFlare = 0;
     let time = 0;
 
     function spawnEmber(fromTop: boolean) {
-      const side = fromTop ? 1 : Math.floor(Math.random() * 4);
-      let x: number, y: number;
-      switch (side) {
-        case 0: x = Math.random() * canvas.width; y = canvas.height; break;
-        case 1: x = Math.random() * canvas.width; y = 0; break;
-        case 2: x = 0; y = Math.random() * canvas.height; break;
-        default: x = canvas.width; y = Math.random() * canvas.height; break;
+      if (aliveCount >= MAX_EMBERS) return;
+      // Find a dead ember in pool
+      let e: Ember | null = null;
+      for (let i = 0; i < pool.length; i++) {
+        if (!pool[i].alive) { e = pool[i]; break; }
       }
-      embers.push({
-        x, y,
-        vx: (Math.random() - 0.5) * 2,
-        vy: fromTop ? 1 + Math.random() * 2 : -1 - Math.random() * 3,
-        life: 1,
-        maxLife: 0.5 + Math.random() * 1.0,
-        size: 1 + Math.random() * (multiplier * 1.5),
-        hue: hues[Math.floor(Math.random() * hues.length)],
-      });
+      if (!e) return;
+
+      const side = fromTop ? 1 : Math.floor(Math.random() * 4);
+      switch (side) {
+        case 0: e.x = Math.random() * w; e.y = h; break;
+        case 1: e.x = Math.random() * w; e.y = 0; break;
+        case 2: e.x = 0; e.y = Math.random() * h; break;
+        default: e.x = w; e.y = Math.random() * h; break;
+      }
+      e.vx = (Math.random() - 0.5) * 2 * SCALE;
+      e.vy = (fromTop ? 1 + Math.random() * 2 : -1 - Math.random() * 3) * SCALE;
+      e.life = 1;
+      e.maxLife = 0.5 + Math.random() * 1.0;
+      e.size = (1 + Math.random() * (multiplier * 1.2)) * SCALE;
+      e.hueIdx = Math.floor(Math.random() * hues.length);
+      e.alive = true;
+      aliveCount++;
+    }
+
+    function spawnFlare() {
+      const bx = Math.random() * w;
+      const by = h;
+      const count = Math.min(12, MAX_EMBERS - aliveCount);
+      for (let i = 0; i < count; i++) {
+        let e: Ember | null = null;
+        for (let j = 0; j < pool.length; j++) {
+          if (!pool[j].alive) { e = pool[j]; break; }
+        }
+        if (!e) return;
+        e.x = bx; e.y = by;
+        e.vx = (Math.random() - 0.5) * 6 * SCALE;
+        e.vy = (-3 - Math.random() * 5) * SCALE;
+        e.life = 1; e.maxLife = 0.3 + Math.random() * 0.5;
+        e.size = (2 + Math.random() * 3) * SCALE;
+        e.hueIdx = Math.floor(Math.random() * hues.length);
+        e.alive = true;
+        aliveCount++;
+      }
     }
 
     function spawnLightning() {
       const side = Math.floor(Math.random() * 4);
       let sx: number, sy: number, ex: number, ey: number;
-      const len = 30 + Math.random() * 60;
+      const len = (30 + Math.random() * 60) * SCALE;
       switch (side) {
-        case 0: sx = Math.random() * canvas.width; sy = canvas.height; ex = sx + (Math.random() - 0.5) * 40; ey = sy - len; break;
-        case 1: sx = Math.random() * canvas.width; sy = 0; ex = sx + (Math.random() - 0.5) * 40; ey = sy + len; break;
-        case 2: sx = 0; sy = Math.random() * canvas.height; ex = sx + len; ey = sy + (Math.random() - 0.5) * 40; break;
-        default: sx = canvas.width; sy = Math.random() * canvas.height; ex = sx - len; ey = sy + (Math.random() - 0.5) * 40; break;
+        case 0: sx = Math.random() * w; sy = h; ex = sx + (Math.random() - 0.5) * 40 * SCALE; ey = sy - len; break;
+        case 1: sx = Math.random() * w; sy = 0; ex = sx + (Math.random() - 0.5) * 40 * SCALE; ey = sy + len; break;
+        case 2: sx = 0; sy = Math.random() * h; ex = sx + len; ey = sy + (Math.random() - 0.5) * 40 * SCALE; break;
+        default: sx = w; sy = Math.random() * h; ex = sx - len; ey = sy + (Math.random() - 0.5) * 40 * SCALE; break;
       }
-      // Midpoint displacement for jagged bolt
       const points: { x: number; y: number }[] = [{ x: sx, y: sy }];
-      const segments = 6;
+      const segments = 5;
       for (let i = 1; i < segments; i++) {
         const t = i / segments;
         points.push({
-          x: sx + (ex - sx) * t + (Math.random() - 0.5) * 20,
-          y: sy + (ey - sy) * t + (Math.random() - 0.5) * 20,
+          x: sx + (ex - sx) * t + (Math.random() - 0.5) * 15 * SCALE,
+          y: sy + (ey - sy) * t + (Math.random() - 0.5) * 15 * SCALE,
         });
       }
       points.push({ x: ex, y: ey });
-      lightnings.push({ points, life: 1, hue: hues[0] });
+      lightnings.push({ points, life: 1, hueIdx: 0 });
     }
 
-    const loop = () => {
-      time += 0.016;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let lastTime = performance.now();
 
-      // Spawn embers
-      for (let i = 0; i < spawnRate; i++) spawnEmber(false);
-      // x4: rain from top too
-      if (multiplier >= 4) {
-        for (let i = 0; i < 8; i++) spawnEmber(true);
+    const loop = (now: number) => {
+      const dt = Math.min((now - lastTime) / 1000, 0.05); // Cap dt to prevent spiral
+      lastTime = now;
+      time += dt;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Time-based spawning
+      spawnAccum += spawnsPerSec * dt;
+      while (spawnAccum >= 1) { spawnEmber(false); spawnAccum--; }
+
+      if (topSpawnsPerSec > 0) {
+        topSpawnAccum += topSpawnsPerSec * dt;
+        while (topSpawnAccum >= 1) { spawnEmber(true); topSpawnAccum--; }
       }
 
-      // x3+: flare bursts every ~0.5s
+      // Flare bursts every ~0.5s at x3+
       if (multiplier >= 3 && time - lastFlare > 0.5) {
         lastFlare = time;
-        const bx = Math.random() * canvas.width;
-        const by = canvas.height;
-        for (let i = 0; i < 20; i++) {
-          embers.push({
-            x: bx, y: by,
-            vx: (Math.random() - 0.5) * 6,
-            vy: -3 - Math.random() * 5,
-            life: 1, maxLife: 0.3 + Math.random() * 0.5,
-            size: 2 + Math.random() * 4,
-            hue: hues[Math.floor(Math.random() * hues.length)],
-          });
-        }
+        spawnFlare();
       }
 
-      // x4: lightning bolts every ~0.8s
-      if (multiplier >= 4 && Math.random() < 0.02) {
+      // Lightning at x4
+      if (multiplier >= 4 && lightnings.length < 3 && Math.random() < 0.02) {
         spawnLightning();
       }
 
-      // Update and draw embers
-      for (let i = embers.length - 1; i >= 0; i--) {
-        const e = embers[i];
+      // Update and draw embers — use fillRect for speed (no arc)
+      aliveCount = 0;
+      for (let i = 0; i < pool.length; i++) {
+        const e = pool[i];
+        if (!e.alive) continue;
+
         e.x += e.vx;
         e.y += e.vy;
-        e.life -= 0.016 / e.maxLife;
-        if (e.life <= 0) { embers.splice(i, 1); continue; }
+        e.life -= dt / e.maxLife;
 
-        const color = hslToRgba(e.hue, 1, 0.5, e.life * 0.8);
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2);
-        ctx.fill();
+        if (e.life <= 0) { e.alive = false; continue; }
+        aliveCount++;
 
-        if (multiplier >= 3) {
-          ctx.fillStyle = hslToRgba(e.hue, 1, 0.5, e.life * 0.15);
-          ctx.beginPath();
-          ctx.arc(e.x, e.y, e.size * 4, 0, Math.PI * 2);
-          ctx.fill();
+        const rgb = hueRgb[e.hueIdx];
+        const alpha = e.life * 0.8;
+        ctx.fillStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha})`;
+        const s = e.size;
+        ctx.fillRect(e.x - s * 0.5, e.y - s * 0.5, s, s);
+
+        // Glow only for larger embers at x3+ (skip small ones for perf)
+        if (multiplier >= 3 && s > 1.5 * SCALE) {
+          ctx.fillStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${e.life * 0.1})`;
+          const gs = s * 3;
+          ctx.fillRect(e.x - gs * 0.5, e.y - gs * 0.5, gs, gs);
         }
       }
 
       // Draw lightning
       for (let i = lightnings.length - 1; i >= 0; i--) {
         const l = lightnings[i];
-        l.life -= 0.08;
+        l.life -= dt * 5;
         if (l.life <= 0) { lightnings.splice(i, 1); continue; }
 
-        // White-hot core
         ctx.strokeStyle = `rgba(255,255,255,${l.life * 0.9})`;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 1.5 * SCALE;
         ctx.beginPath();
         ctx.moveTo(l.points[0].x, l.points[0].y);
         for (let j = 1; j < l.points.length; j++) {
@@ -189,58 +232,60 @@ export function StreakFire({ multiplier, active }: StreakFireProps) {
         }
         ctx.stroke();
 
-        // Colored glow
-        ctx.strokeStyle = hslToRgba(l.hue, 1, 0.5, l.life * 0.5);
-        ctx.lineWidth = 6;
+        const rgb = hueRgb[l.hueIdx];
+        ctx.strokeStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${l.life * 0.4})`;
+        ctx.lineWidth = 4 * SCALE;
         ctx.stroke();
       }
 
-      ctx.globalAlpha = 1;
-
-      // Edge glows — all 4 sides at x4, bottom + sides at x3
+      // Edge glows
       const intensity = multiplier === 2 ? 0.06 : multiplier === 3 ? 0.14 : 0.25;
-      const edgeW = multiplier === 2 ? 60 : multiplier === 3 ? 100 : 120;
+      const edgeW = (multiplier === 2 ? 60 : multiplier === 3 ? 100 : 120) * SCALE;
       const pulse = Math.sin(time * 3) * 0.03;
+      const rgb0 = hueRgb[0];
 
       // Bottom
-      const grad = ctx.createLinearGradient(0, canvas.height, 0, canvas.height - edgeW);
-      grad.addColorStop(0, hslToRgba(hues[0], 1, 0.5, intensity + pulse));
+      const grad = ctx.createLinearGradient(0, h, 0, h - edgeW);
+      grad.addColorStop(0, `rgba(${rgb0[0]},${rgb0[1]},${rgb0[2]},${intensity + pulse})`);
       grad.addColorStop(1, 'transparent');
       ctx.fillStyle = grad;
-      ctx.fillRect(0, canvas.height - edgeW, canvas.width, edgeW);
+      ctx.fillRect(0, h - edgeW, w, edgeW);
 
       // Sides
       const sideI = multiplier >= 4 ? intensity * 0.7 : intensity * 0.4;
-      const sideW = multiplier >= 4 ? 80 : 50;
+      const sideW = (multiplier >= 4 ? 80 : 50) * SCALE;
+
       const gradL = ctx.createLinearGradient(0, 0, sideW, 0);
-      gradL.addColorStop(0, hslToRgba(hues[0], 1, 0.5, sideI));
+      gradL.addColorStop(0, `rgba(${rgb0[0]},${rgb0[1]},${rgb0[2]},${sideI})`);
       gradL.addColorStop(1, 'transparent');
       ctx.fillStyle = gradL;
-      ctx.fillRect(0, 0, sideW, canvas.height);
+      ctx.fillRect(0, 0, sideW, h);
 
-      const gradR = ctx.createLinearGradient(canvas.width, 0, canvas.width - sideW, 0);
-      gradR.addColorStop(0, hslToRgba(hues[0], 1, 0.5, sideI));
+      const gradR = ctx.createLinearGradient(w, 0, w - sideW, 0);
+      gradR.addColorStop(0, `rgba(${rgb0[0]},${rgb0[1]},${rgb0[2]},${sideI})`);
       gradR.addColorStop(1, 'transparent');
       ctx.fillStyle = gradR;
-      ctx.fillRect(canvas.width - sideW, 0, sideW, canvas.height);
+      ctx.fillRect(w - sideW, 0, sideW, h);
 
       // Top edge at x4
       if (multiplier >= 4) {
-        const gradT = ctx.createLinearGradient(0, 0, 0, edgeW * 0.6);
-        gradT.addColorStop(0, hslToRgba(hues[0], 1, 0.5, sideI));
+        const topW = edgeW * 0.6;
+        const gradT = ctx.createLinearGradient(0, 0, 0, topW);
+        gradT.addColorStop(0, `rgba(${rgb0[0]},${rgb0[1]},${rgb0[2]},${sideI})`);
         gradT.addColorStop(1, 'transparent');
         ctx.fillStyle = gradT;
-        ctx.fillRect(0, 0, canvas.width, edgeW * 0.6);
+        ctx.fillRect(0, 0, w, topW);
       }
 
-      // x3+: flame tongues at bottom
+      // Flame tongues at x3+ (reduced iteration)
       if (multiplier >= 3) {
-        for (let fx = 0; fx < canvas.width; fx += 40) {
-          const flameH = 20 + Math.sin(time * 2 + fx * 0.05) * 15 + Math.sin(time * 5 + fx * 0.1) * 8;
-          ctx.fillStyle = hslToRgba(hues[0], 1, 0.55, 0.06);
+        const step = 60; // wider spacing for perf
+        ctx.fillStyle = `rgba(${rgb0[0]},${rgb0[1]},${rgb0[2]},0.06)`;
+        for (let fx = 0; fx < w; fx += step) {
+          const flameH = (20 + Math.sin(time * 2 + fx * 0.05) * 15 + Math.sin(time * 5 + fx * 0.1) * 8) * SCALE;
           ctx.beginPath();
-          ctx.moveTo(fx, canvas.height);
-          ctx.quadraticCurveTo(fx + 20, canvas.height - flameH, fx + 40, canvas.height);
+          ctx.moveTo(fx, h);
+          ctx.quadraticCurveTo(fx + step * 0.5, h - flameH, fx + step, h);
           ctx.fill();
         }
       }
@@ -261,6 +306,7 @@ export function StreakFire({ multiplier, active }: StreakFireProps) {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-30"
+      style={{ imageRendering: 'auto', width: '100vw', height: '100vh' }}
       aria-hidden="true"
     />
   );

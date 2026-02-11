@@ -5,11 +5,12 @@ import { useSettingsStore } from '../../stores/settingsStore';
 interface HeaderProps {
   onStats: () => void;
   onSettings: () => void;
+  onLeaderboard: () => void;
   onHome: () => void;
   showBack?: boolean;
 }
 
-export function Header({ onStats, onSettings, onHome, showBack = false }: HeaderProps) {
+export function Header({ onStats, onSettings, onLeaderboard, onHome, showBack = false }: HeaderProps) {
   const musicEnabled = useSettingsStore((s) => s.musicEnabled);
   const toggleMusic = useSettingsStore((s) => s.toggleMusic);
 
@@ -58,6 +59,9 @@ export function Header({ onStats, onSettings, onHome, showBack = false }: Header
           )}
         </motion.button>
 
+        <Button variant="ghost" size="sm" onClick={onLeaderboard}>
+          Scores
+        </Button>
         <Button variant="ghost" size="sm" onClick={onStats}>
           Stats
         </Button>

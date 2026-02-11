@@ -226,6 +226,17 @@ export function playPowerSurge(multiplier: number, volume: number) {
   }
 }
 
+/** Short tick for arcade letter scrolling */
+export function playLetterTick(volume: number) {
+  playTone(1200, 0.015, volume * 0.12, 'square');
+}
+
+/** Lock-in sound for arcade slot confirm */
+export function playSlotConfirm(volume: number) {
+  playTone(880, 0.08, volume * 0.2, 'square');
+  setTimeout(() => playTone(1100, 0.06, volume * 0.15, 'square'), 50);
+}
+
 /** Orbital strike incoming sound for x4 combo completions */
 export function playOrbitalStrike(volume: number) {
   const v = volume * 0.25;

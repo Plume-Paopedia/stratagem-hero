@@ -176,21 +176,29 @@ export function FactionBackground() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // Half-resolution + 30fps throttle for performance
+    const SCALE = 0.5;
+    const FRAME_INTERVAL = 1000 / 30; // 30fps
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.width = Math.floor(window.innerWidth * SCALE);
+      canvas.height = Math.floor(window.innerHeight * SCALE);
     };
     resize();
     window.addEventListener('resize', resize);
+    canvas.style.width = '100vw';
+    canvas.style.height = '100vh';
 
     const drawFn = DRAW_MAP[activeFaction];
     const startTime = performance.now();
+    let lastFrame = 0;
 
-    const loop = () => {
-      const time = (performance.now() - startTime) / 1000;
+    const loop = (now: number) => {
+      rafRef.current = requestAnimationFrame(loop);
+      if (now - lastFrame < FRAME_INTERVAL) return;
+      lastFrame = now;
+      const time = (now - startTime) / 1000;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawFn(ctx, canvas.width, canvas.height, time);
-      rafRef.current = requestAnimationFrame(loop);
     };
 
     rafRef.current = requestAnimationFrame(loop);
