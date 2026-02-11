@@ -12,8 +12,16 @@ const multiplierColors: Record<number, string> = {
   4: 'text-hd-red',
 };
 
+const multiplierGlows: Record<number, string> = {
+  2: '0 0 8px rgba(245,197,24,0.4)',
+  3: '0 0 12px rgba(255,150,50,0.5), 0 0 24px rgba(255,150,50,0.2)',
+  4: '0 0 16px rgba(255,51,51,0.6), 0 0 32px rgba(255,51,51,0.3), 0 0 48px rgba(255,51,51,0.15)',
+};
+
 export function StreakIndicator({ streak, multiplier }: StreakIndicatorProps) {
   if (streak === 0) return null;
+
+  const isMax = multiplier >= 4;
 
   return (
     <div className="flex items-center gap-3">
@@ -34,11 +42,29 @@ export function StreakIndicator({ streak, multiplier }: StreakIndicatorProps) {
           <motion.div
             key={multiplier}
             initial={{ scale: 2, opacity: 0, rotate: -10 }}
-            animate={{ scale: 1, opacity: 1, rotate: 0 }}
-            className={`font-display text-lg font-bold ${multiplierColors[multiplier] ?? 'text-hd-red'}`}
+            animate={{
+              scale: isMax ? [1, 1.08, 1] : 1,
+              opacity: 1,
+              rotate: 0,
+            }}
+            transition={isMax ? {
+              scale: { repeat: Infinity, duration: 0.8, ease: 'easeInOut' },
+            } : undefined}
+            className={`font-display font-bold ${multiplierColors[multiplier] ?? 'text-hd-red'} ${isMax ? 'text-2xl' : 'text-lg'}`}
+            style={{
+              textShadow: multiplierGlows[multiplier] ?? undefined,
+            }}
           >
-            x{multiplier}
-            {multiplier >= 2 && <span className="ml-1">&#x1F525;</span>}
+            {isMax && (
+              <span className="text-[10px] block text-hd-red/80 uppercase tracking-wider -mb-1">
+                MAXIMUM
+              </span>
+            )}
+            <span className="flex items-center gap-1">
+              x{multiplier}
+              {multiplier >= 2 && <span>&#x1F525;</span>}
+              {multiplier >= 3 && <span>&#x1F525;</span>}
+            </span>
           </motion.div>
         </AnimatePresence>
       )}

@@ -1,4 +1,6 @@
 import { useEffect, useRef } from 'react';
+import { useFactionStore } from '../../stores/factionStore';
+import { FACTIONS } from '../../types/factions';
 
 interface FloatingParticle {
   x: number;
@@ -10,14 +12,32 @@ interface FloatingParticle {
   hue: number; // 0 = white, 45 = yellow
 }
 
+/** Convert HSL hue to an approximate RGB for canvas rendering */
+function hueToRgb(hue: number): [number, number, number] {
+  const h = ((hue % 360) + 360) % 360 / 60;
+  const x = 1 - Math.abs((h % 2) - 1);
+  let r = 0, g = 0, b = 0;
+  if (h < 1) { r = 1; g = x; }
+  else if (h < 2) { r = x; g = 1; }
+  else if (h < 3) { g = 1; b = x; }
+  else if (h < 4) { g = x; b = 1; }
+  else if (h < 5) { r = x; b = 1; }
+  else { r = 1; b = x; }
+  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
 /**
  * Full-screen ambient floating particles.
  * Tiny glowing specks drift slowly across the screen like embers / space dust.
+ * Shifts hues to match the active faction.
  */
 export function AmbientParticles() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<FloatingParticle[]>([]);
   const rafRef = useRef(0);
+  const faction = useFactionStore((s) => s.activeFaction);
+  const factionRef = useRef(faction);
+  factionRef.current = faction;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -36,47 +56,59 @@ export function AmbientParticles() {
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
       vx: (Math.random() - 0.5) * 0.3,
-      vy: -0.2 - Math.random() * 0.4, // Drift upward like embers
+      vy: -0.2 - Math.random() * 0.4,
       size: 1 + Math.random() * 2,
       opacity: 0.1 + Math.random() * 0.3,
-      hue: Math.random() > 0.7 ? 45 : 0, // Some yellow, mostly white
+      hue: Math.random() > 0.7 ? 45 : 0,
     }));
 
     const ctx = canvas.getContext('2d')!;
     let lastTime = performance.now();
 
     const loop = (time: number) => {
-      const dt = (time - lastTime) / 16.67; // Normalize to ~60fps
+      const dt = (time - lastTime) / 16.67;
       lastTime = time;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const f = factionRef.current;
+      const factionHues = f ? FACTIONS[f].particleHues : null;
 
       for (const p of particlesRef.current) {
         p.x += p.vx * dt;
         p.y += p.vy * dt;
 
-        // Wrap around
         if (p.y < -10) { p.y = canvas.height + 10; p.x = Math.random() * canvas.width; }
         if (p.x < -10) p.x = canvas.width + 10;
         if (p.x > canvas.width + 10) p.x = -10;
 
-        // Flicker
         const flicker = 0.7 + Math.sin(time * 0.003 + p.x) * 0.3;
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        if (p.hue === 45) {
+
+        if (factionHues && p.hue !== 0) {
+          const fh = factionHues[Math.floor(Math.abs(p.x)) % factionHues.length];
+          const [r, g, b] = hueToRgb(fh);
+          ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${p.opacity * flicker})`;
+        } else if (p.hue === 45) {
           ctx.fillStyle = `rgba(245, 197, 24, ${p.opacity * flicker})`;
         } else {
           ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity * flicker * 0.5})`;
         }
         ctx.fill();
 
-        // Glow for yellow particles
-        if (p.hue === 45 && p.size > 1.5) {
+        // Glow for colored particles
+        if (p.hue !== 0 && p.size > 1.5) {
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(245, 197, 24, ${p.opacity * flicker * 0.08})`;
+          if (factionHues) {
+            const fh = factionHues[Math.floor(Math.abs(p.x)) % factionHues.length];
+            const [r, g, b] = hueToRgb(fh);
+            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${p.opacity * flicker * 0.08})`;
+          } else {
+            ctx.fillStyle = `rgba(245, 197, 24, ${p.opacity * flicker * 0.08})`;
+          }
           ctx.fill();
         }
       }

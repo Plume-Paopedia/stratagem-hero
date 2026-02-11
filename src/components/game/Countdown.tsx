@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAudio } from '../../hooks/useAudio';
+import { useFactionStore } from '../../stores/factionStore';
+import { FACTIONS } from '../../types/factions';
+import { FactionIcon } from '../ui/FactionIcon';
 
 interface CountdownProps {
   onComplete: () => void;
@@ -9,6 +12,9 @@ interface CountdownProps {
 export function Countdown({ onComplete }: CountdownProps) {
   const [count, setCount] = useState(3);
   const { countdownBeep, deploySound } = useAudio();
+  const faction = useFactionStore((s) => s.activeFaction);
+  const factionTheme = faction ? FACTIONS[faction] : null;
+  const ringColor = factionTheme ? factionTheme.colors.primary : '#f5c518';
 
   useEffect(() => {
     countdownBeep(count);
@@ -28,35 +34,51 @@ export function Countdown({ onComplete }: CountdownProps) {
       {/* Orbital targeting rings */}
       <div className="absolute">
         <motion.div
-          className="w-64 h-64 rounded-full border border-hd-yellow/20"
+          className="w-64 h-64 rounded-full border"
+          style={{ borderColor: `${ringColor}33` }}
           animate={{ rotate: 360 }}
           transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
         />
         <motion.div
-          className="absolute inset-4 rounded-full border border-hd-yellow/15"
+          className="absolute inset-4 rounded-full border"
+          style={{ borderColor: `${ringColor}26` }}
           animate={{ rotate: -360 }}
           transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
         />
         <motion.div
-          className="absolute inset-10 rounded-full border border-dashed border-hd-yellow/10"
+          className="absolute inset-10 rounded-full border border-dashed"
+          style={{ borderColor: `${ringColor}1a` }}
           animate={{ rotate: 360 }}
           transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
         />
 
+        {/* Faction icon at center */}
+        {faction && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <motion.div
+              animate={{ opacity: [0.2, 0.5, 0.2] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <FactionIcon faction={faction} size={32} glow />
+            </motion.div>
+          </div>
+        )}
+
         {/* Crosshairs */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-full h-[1px] bg-hd-yellow/10" />
+          <div className="w-full h-[1px]" style={{ backgroundColor: `${ringColor}1a` }} />
         </div>
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="h-full w-[1px] bg-hd-yellow/10" />
+          <div className="h-full w-[1px]" style={{ backgroundColor: `${ringColor}1a` }} />
         </div>
 
         {/* Corner ticks on ring */}
         {[0, 90, 180, 270].map((deg) => (
           <motion.div
             key={deg}
-            className="absolute top-1/2 left-1/2 w-4 h-[2px] bg-hd-yellow/40"
+            className="absolute top-1/2 left-1/2 w-4 h-[2px]"
             style={{
+              backgroundColor: `${ringColor}66`,
               transformOrigin: '0 50%',
               transform: `rotate(${deg}deg) translateX(128px)`,
             }}
@@ -68,11 +90,12 @@ export function Countdown({ onComplete }: CountdownProps) {
 
       {/* Status text at top */}
       <motion.div
-        className="absolute top-[20%] font-heading text-sm text-hd-yellow/40 uppercase tracking-[0.5em]"
+        className="absolute top-[20%] font-heading text-sm uppercase tracking-[0.5em]"
+        style={{ color: `${ringColor}66` }}
         animate={{ opacity: [0.3, 0.7, 0.3] }}
         transition={{ duration: 2, repeat: Infinity }}
       >
-        Orbital Lock Acquired
+        {factionTheme ? `${factionTheme.name} Contact` : 'Orbital Lock'} — Acquired
       </motion.div>
 
       {/* Main countdown number */}
@@ -123,11 +146,12 @@ export function Countdown({ onComplete }: CountdownProps) {
 
       {/* Bottom status text */}
       <motion.div
-        className="absolute bottom-[20%] font-heading text-xs text-hd-gray/30 uppercase tracking-[0.4em]"
+        className="absolute bottom-[20%] font-heading text-xs uppercase tracking-[0.4em]"
+        style={{ color: factionTheme ? `${ringColor}4d` : 'rgba(107,114,128,0.3)' }}
         animate={{ opacity: [0.2, 0.5, 0.2] }}
         transition={{ duration: 1.5, repeat: Infinity }}
       >
-        Super Destroyer Standing By
+        {factionTheme ? factionTheme.tagline : 'Super Destroyer Standing By'}
       </motion.div>
     </div>
   );

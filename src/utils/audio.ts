@@ -125,11 +125,28 @@ export function playStreakUp(level: number, volume: number) {
   const v = volume * 0.25;
   if (level === 2) {
     playSweep(400, 800, 0.1, v, 'square');
+    // Quick C-E-G arpeggio
+    setTimeout(() => playTone(523, 0.06, v * 0.5, 'square'), 50);
+    setTimeout(() => playTone(659, 0.06, v * 0.5, 'square'), 90);
+    setTimeout(() => playTone(784, 0.08, v * 0.5, 'square'), 130);
   } else if (level === 3) {
-    playSweep(400, 1200, 0.15, v, 'square');
+    playSweep(300, 1200, 0.15, v, 'square');
+    // Chord + timpani
+    playChord([523, 659, 784], 0.2, v * 0.6, 'square');
+    playTone(80, 0.15, v * 0.8, 'sine'); // timpani
   } else if (level >= 4) {
+    // Full fanfare — ascending arpeggio
     playSweep(400, 1600, 0.2, v, 'square');
-    setTimeout(() => playSweep(600, 1800, 0.15, v * 0.6, 'sine'), 50);
+    playSweep(600, 1800, 0.15, v * 0.6, 'sine');
+    const notes = [523, 659, 784, 1047, 1319];
+    notes.forEach((freq, i) => {
+      setTimeout(() => playTone(freq, 0.1, v * 0.6, 'square'), i * 60);
+    });
+    // Double timpani
+    playTone(60, 0.2, v * 0.9, 'sine');
+    setTimeout(() => playTone(80, 0.15, v * 0.7, 'sine'), 100);
+    // Noise burst finale
+    setTimeout(() => playNoise(0.08, v * 0.4), 280);
   }
 }
 
@@ -170,4 +187,53 @@ export function playRecordFanfare(volume: number) {
   setTimeout(() => playTone(659, 0.12, v, 'square'), 80);
   setTimeout(() => playTone(784, 0.12, v, 'square'), 160);
   setTimeout(() => playTone(1047, 0.2, v, 'square'), 240);
+}
+
+/** Power surge drone for x3+ streaks */
+export function playPowerSurge(multiplier: number, volume: number) {
+  const v = volume * 0.15;
+  const ctx = getContext();
+  const now = ctx.currentTime;
+
+  const osc = ctx.createOscillator();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(80, now);
+
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.001, now);
+  gain.gain.linearRampToValueAtTime(v, now + 0.15);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(now);
+  osc.stop(now + 0.35);
+
+  // Overtones at x4
+  if (multiplier >= 4) {
+    [160, 240].forEach((freq) => {
+      const o = ctx.createOscillator();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(freq, now);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.001, now);
+      g.gain.linearRampToValueAtTime(v * 0.4, now + 0.12);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+      o.connect(g).connect(ctx.destination);
+      o.start(now);
+      o.stop(now + 0.3);
+    });
+  }
+}
+
+/** Orbital strike incoming sound for x4 combo completions */
+export function playOrbitalStrike(volume: number) {
+  const v = volume * 0.25;
+  // Descending ordnance sweep
+  playSweep(4000, 200, 0.4, v, 'sawtooth');
+  // Bass explosion after delay
+  setTimeout(() => {
+    playNoise(0.15, v * 0.6);
+    playTone(60, 0.3, v * 0.8, 'sine');
+  }, 350);
 }

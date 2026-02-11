@@ -1,16 +1,16 @@
 /**
- * Procedural Helldivers 2-style music engine.
- * Generates a looping military march with synth brass, war drums, and patriotic melody.
- * Everything synthesized in real-time — zero external audio files.
+ * 8-bit Helldivers 2 music engine.
+ * Chiptune renditions of HD2-inspired heroic themes.
+ * All synthesized in real-time via Web Audio API — zero external files.
  */
 
 let ctx: AudioContext | null = null;
 let masterGain: GainNode | null = null;
 let isPlaying = false;
-let intervalIds: number[] = [];
-let oscillators: OscillatorNode[] = [];
+let intervalId: number | null = null;
 let currentBeat = 0;
-let bpm = 140;
+let phraseIndex = 0;
+const bpm = 150;
 
 function getCtx(): AudioContext {
   if (!ctx) {
@@ -28,187 +28,334 @@ function getMaster(): GainNode {
   return masterGain!;
 }
 
-/** Play a short percussive hit (kick/snare) */
-function playDrum(freq: number, decay: number, volume: number, noise = false) {
+// ── Note frequencies ──────────────────────────────────────────────────
+
+const NOTE: Record<string, number> = {
+  G2: 98.0, A2: 110.0, B2: 123.47,
+  C3: 130.81, D3: 146.83, E3: 164.81, F3: 174.61, G3: 196.0, A3: 220.0, B3: 246.94,
+  C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392.0, A4: 440.0, B4: 493.88,
+  C5: 523.25, D5: 587.33, E5: 659.26, F5: 698.46, G5: 784.0,
+};
+
+// ── 8-bit Instrument voices ──────────────────────────────────────────
+
+/** NES-style pulse lead with vibrato */
+function playLead(freq: number, duration: number, volume: number) {
   const c = getCtx();
   const m = getMaster();
   const now = c.currentTime;
 
-  if (noise) {
-    // Snare: noise burst
-    const bufferSize = c.sampleRate * decay;
-    const buffer = c.createBuffer(1, bufferSize, c.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
-    }
-    const src = c.createBufferSource();
-    src.buffer = buffer;
-    const g = c.createGain();
-    g.gain.setValueAtTime(volume * 0.4, now);
-    g.gain.exponentialRampToValueAtTime(0.001, now + decay);
+  const osc = c.createOscillator();
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(freq, now);
 
-    // Also add a tonal hit
-    const osc = c.createOscillator();
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(freq, now);
-    osc.frequency.exponentialRampToValueAtTime(freq * 0.3, now + decay * 0.5);
-    const og = c.createGain();
-    og.gain.setValueAtTime(volume * 0.5, now);
-    og.gain.exponentialRampToValueAtTime(0.001, now + decay * 0.5);
-
-    src.connect(g).connect(m);
-    osc.connect(og).connect(m);
-    src.start(now);
-    osc.start(now);
-    osc.stop(now + decay);
-  } else {
-    // Kick drum
-    const osc = c.createOscillator();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(freq, now);
-    osc.frequency.exponentialRampToValueAtTime(30, now + decay);
-    const g = c.createGain();
-    g.gain.setValueAtTime(volume, now);
-    g.gain.exponentialRampToValueAtTime(0.001, now + decay);
-    osc.connect(g).connect(m);
-    osc.start(now);
-    osc.stop(now + decay);
-  }
-}
-
-/** Play a synth brass note */
-function playBrass(freq: number, duration: number, volume: number, delay = 0) {
-  const c = getCtx();
-  const m = getMaster();
-  const now = c.currentTime + delay;
-
-  // Two detuned sawtooths for thick brass
-  const osc1 = c.createOscillator();
-  const osc2 = c.createOscillator();
-  osc1.type = 'sawtooth';
-  osc2.type = 'sawtooth';
-  osc1.frequency.setValueAtTime(freq, now);
-  osc2.frequency.setValueAtTime(freq * 1.003, now); // Slight detune
-
-  // Low-pass filter for warmth
-  const filter = c.createBiquadFilter();
-  filter.type = 'lowpass';
-  filter.frequency.setValueAtTime(2000, now);
-  filter.frequency.linearRampToValueAtTime(800, now + duration);
-  filter.Q.value = 1;
+  // Vibrato LFO
+  const lfo = c.createOscillator();
+  const lfoGain = c.createGain();
+  lfo.frequency.value = 5;
+  lfoGain.gain.value = freq * 0.015; // ~1.5% pitch wobble
+  lfo.connect(lfoGain);
+  lfoGain.connect(osc.frequency);
+  lfo.start(now);
+  lfo.stop(now + duration);
 
   const g = c.createGain();
-  g.gain.setValueAtTime(0.001, now);
-  g.gain.linearRampToValueAtTime(volume, now + 0.05);
-  g.gain.setValueAtTime(volume, now + duration - 0.08);
+  g.gain.setValueAtTime(volume, now);
+  g.gain.setValueAtTime(volume * 0.9, now + duration * 0.7);
   g.gain.exponentialRampToValueAtTime(0.001, now + duration);
 
-  osc1.connect(filter);
-  osc2.connect(filter);
-  filter.connect(g).connect(m);
-
-  osc1.start(now);
-  osc2.start(now);
-  osc1.stop(now + duration);
-  osc2.stop(now + duration);
-  oscillators.push(osc1, osc2);
+  osc.connect(g).connect(m);
+  osc.start(now);
+  osc.stop(now + duration);
 }
 
-/** Play a bass note */
+/** Chiptune arpeggio — rapidly cycles chord tones */
+function playArpeggio(notes: number[], speed: number, duration: number, volume: number) {
+  const c = getCtx();
+  const m = getMaster();
+  const now = c.currentTime;
+
+  const osc = c.createOscillator();
+  osc.type = 'square';
+
+  // Schedule rapid frequency changes
+  const cycleTime = speed;
+  let t = now;
+  while (t < now + duration) {
+    for (const note of notes) {
+      if (t >= now + duration) break;
+      osc.frequency.setValueAtTime(note, t);
+      t += cycleTime;
+    }
+  }
+
+  const g = c.createGain();
+  g.gain.setValueAtTime(volume * 0.5, now);
+  g.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+  osc.connect(g).connect(m);
+  osc.start(now);
+  osc.stop(now + duration);
+}
+
+/** Triangle wave bass (classic NES) */
 function playBass(freq: number, duration: number, volume: number) {
   const c = getCtx();
   const m = getMaster();
   const now = c.currentTime;
 
   const osc = c.createOscillator();
-  osc.type = 'sawtooth';
+  osc.type = 'triangle';
   osc.frequency.setValueAtTime(freq, now);
-
-  const filter = c.createBiquadFilter();
-  filter.type = 'lowpass';
-  filter.frequency.value = 300;
-  filter.Q.value = 2;
 
   const g = c.createGain();
   g.gain.setValueAtTime(volume, now);
+  g.gain.setValueAtTime(volume * 0.8, now + duration * 0.6);
   g.gain.exponentialRampToValueAtTime(0.001, now + duration);
 
-  osc.connect(filter).connect(g).connect(m);
+  osc.connect(g).connect(m);
   osc.start(now);
   osc.stop(now + duration);
-  oscillators.push(osc);
 }
 
-// Note frequencies
-const NOTE: Record<string, number> = {
-  C3: 130.81, D3: 146.83, E3: 164.81, F3: 174.61, G3: 196.0, A3: 220.0, Bb3: 233.08, B3: 246.94,
-  C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392.0, A4: 440.0, Bb4: 466.16, B4: 493.88,
-  C5: 523.25, D5: 587.33, E5: 659.26, F5: 698.46, G5: 784.0,
-};
+/** 8-bit kick drum — short triangle pitch sweep */
+function playKick(volume: number) {
+  const c = getCtx();
+  const m = getMaster();
+  const now = c.currentTime;
 
-// Patriotic military melody — reminiscent of HD2 march vibes
-// Pattern repeats every 32 beats (2 bars of 4/4 at subdivided 8ths)
-const melodyPattern: (string | null)[] = [
-  'C4', null, 'C4', 'D4', 'E4', null, 'E4', 'F4',    // Beat 1-8
-  'G4', null, 'G4', null, 'E4', null, 'C4', null,     // Beat 9-16
-  'F4', null, 'F4', 'E4', 'D4', null, 'D4', 'E4',    // Beat 17-24
-  'C4', null, null, null, 'G4', null, 'C5', null,     // Beat 25-32
+  const osc = c.createOscillator();
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(150, now);
+  osc.frequency.exponentialRampToValueAtTime(40, now + 0.08);
+
+  const g = c.createGain();
+  g.gain.setValueAtTime(volume, now);
+  g.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+
+  osc.connect(g).connect(m);
+  osc.start(now);
+  osc.stop(now + 0.12);
+}
+
+/** 8-bit snare — noise + triangle hit */
+function playSnare(volume: number) {
+  const c = getCtx();
+  const m = getMaster();
+  const now = c.currentTime;
+
+  // Noise burst
+  const bufSize = c.sampleRate * 0.08;
+  const buf = c.createBuffer(1, bufSize, c.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < bufSize; i++) {
+    data[i] = (Math.random() * 2 - 1) * (1 - i / bufSize);
+  }
+  const src = c.createBufferSource();
+  src.buffer = buf;
+  const ng = c.createGain();
+  ng.gain.setValueAtTime(volume * 0.5, now);
+  ng.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+  // Tonal hit
+  const osc = c.createOscillator();
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(300, now);
+  osc.frequency.exponentialRampToValueAtTime(100, now + 0.05);
+  const og = c.createGain();
+  og.gain.setValueAtTime(volume * 0.4, now);
+  og.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+
+  src.connect(ng).connect(m);
+  osc.connect(og).connect(m);
+  src.start(now);
+  osc.start(now);
+  osc.stop(now + 0.08);
+}
+
+/** 8-bit hihat — filtered noise, very short */
+function playHihat(volume: number) {
+  const c = getCtx();
+  const m = getMaster();
+  const now = c.currentTime;
+
+  const bufSize = c.sampleRate * 0.03;
+  const buf = c.createBuffer(1, bufSize, c.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < bufSize; i++) {
+    data[i] = (Math.random() * 2 - 1) * (1 - i / bufSize);
+  }
+  const src = c.createBufferSource();
+  src.buffer = buf;
+
+  const bp = c.createBiquadFilter();
+  bp.type = 'bandpass';
+  bp.frequency.value = 8000;
+  bp.Q.value = 1;
+
+  const g = c.createGain();
+  g.gain.setValueAtTime(volume * 0.2, now);
+  g.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+
+  src.connect(bp).connect(g).connect(m);
+  src.start(now);
+}
+
+/** Crash cymbal for phrase transitions */
+function playCrash(volume: number) {
+  const c = getCtx();
+  const m = getMaster();
+  const now = c.currentTime;
+
+  const bufSize = c.sampleRate * 0.3;
+  const buf = c.createBuffer(1, bufSize, c.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < bufSize; i++) {
+    data[i] = (Math.random() * 2 - 1) * (1 - i / bufSize) ** 0.5;
+  }
+  const src = c.createBufferSource();
+  src.buffer = buf;
+
+  const hp = c.createBiquadFilter();
+  hp.type = 'highpass';
+  hp.frequency.value = 4000;
+
+  const g = c.createGain();
+  g.gain.setValueAtTime(volume * 0.25, now);
+  g.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+  src.connect(hp).connect(g).connect(m);
+  src.start(now);
+}
+
+// ── Composition: HD2-inspired 8-bit themes ───────────────────────────
+// 32 steps per phrase at 8th-note resolution
+
+// Theme A: "A Cup of Liber-Tea" inspired — heroic ascending fanfare
+const themeA: (string | null)[] = [
+  'C4', null, 'C4', 'E4',   'G4', null, 'G4', null,     // Heroic opening C-E-G
+  'A4', null, 'G4', null,   'F4', 'E4', 'D4', null,     // Descending answer
+  'E4', null, 'E4', 'G4',   'C5', null, 'C5', null,     // Rise to octave
+  'B4', null, 'A4', 'G4',   'A4', null, null, null,      // Resolution
 ];
 
-const melodyPattern2: (string | null)[] = [
-  'E4', null, 'E4', 'F4', 'G4', null, 'G4', 'A4',    // Beat 1-8
-  'C5', null, 'C5', null, 'G4', null, 'E4', null,     // Beat 9-16
-  'A4', null, 'G4', 'F4', 'E4', null, 'D4', null,    // Beat 17-24
-  'C4', null, null, null, null, null, null, null,      // Beat 25-32
+// Theme B: Military staccato counter-melody
+const themeB: (string | null)[] = [
+  'G4', 'G4', null, 'G4',   'E4', null, 'C4', null,     // Repeated-note march
+  'D4', null, 'D4', 'F4',   'A4', null, 'G4', null,     // Rising tension
+  'C5', null, 'B4', 'A4',   'G4', null, 'G4', 'A4',     // Climactic descent
+  'G4', null, 'E4', null,   'C4', null, null, null,      // Cadence
 ];
 
-const bassPattern: (string | null)[] = [
-  'C3', null, null, null, 'G3', null, null, null,
-  'C3', null, null, null, 'E3', null, null, null,
-  'F3', null, null, null, 'G3', null, null, null,
-  'C3', null, null, null, 'G3', null, null, null,
+// Theme C: Triumph fanfare — bold and climactic
+const themeC: (string | null)[] = [
+  'C5', null, 'C5', null,   'G4', null, 'G4', null,     // Bold octave statements
+  'A4', 'A4', null, 'A4',   'G4', null, 'E4', null,     // Driving rhythm
+  'F4', null, 'E4', 'D4',   'E4', null, 'G4', null,     // Tension builder
+  'C5', null, null, 'G4',   'C5', null, 'E5', null,     // Triumphant leap
 ];
 
-// March drum pattern: K = kick, S = snare, H = hihat-ish
-// Strong march: BOOM-tap-BOOM-tap
-const drumPattern: ('K' | 'S' | 'H' | null)[] = [
-  'K', null, 'H', null, 'S', null, 'H', null,
-  'K', null, 'H', 'H', 'S', null, 'H', null,
-  'K', null, 'H', null, 'S', null, 'H', null,
-  'K', 'K', 'H', null, 'S', null, 'S', 'S',
+// Bass lines matched to themes
+const bassA: (string | null)[] = [
+  'C3', null, null, null,   'C3', null, null, null,
+  'F3', null, null, null,   'G3', null, null, null,
+  'C3', null, null, null,   'E3', null, null, null,
+  'F3', null, 'G3', null,   'C3', null, null, null,
 ];
 
-let phraseIndex = 0;
+const bassB: (string | null)[] = [
+  'C3', null, 'E3', null,   'G3', null, 'C3', null,
+  'D3', null, 'F3', null,   'A3', null, 'G3', null,
+  'C3', null, 'B2', null,   'A2', null, 'G2', null,
+  'F3', null, 'G3', null,   'C3', null, null, null,
+];
+
+const bassC: (string | null)[] = [
+  'C3', null, null, 'G3',   'C3', null, null, 'G3',
+  'A2', null, null, 'A2',   'G2', null, null, null,
+  'F3', null, 'E3', null,   'C3', null, 'G3', null,
+  'C3', null, null, null,   'C3', null, 'C3', null,
+];
+
+// Arpeggio chord progressions per theme (root, 3rd, 5th)
+const arpA: ([string, string, string] | null)[] = [
+  ['C4', 'E4', 'G4'], null, null, null,  null, null, null, null,
+  ['F4', 'A4', 'C5'], null, null, null,  null, null, null, null,
+  ['C4', 'E4', 'G4'], null, null, null,  null, null, null, null,
+  ['F4', 'A4', 'C5'], null, null, null,  ['G4', 'B4', 'D5'], null, null, null,
+];
+
+// Drum patterns
+const drumMain: ('K' | 'S' | 'H' | null)[] = [
+  'K', null, 'H', null,   'S', null, 'H', null,
+  'K', null, 'H', 'H',   'S', null, 'H', null,
+  'K', null, 'H', null,   'S', null, 'H', null,
+  'K', 'K', 'H', null,   'S', null, 'S', 'H',
+];
+
+const drumIntense: ('K' | 'S' | 'H' | null)[] = [
+  'K', null, 'H', 'K',   'S', null, 'K', 'H',
+  'K', 'H', 'H', 'K',   'S', null, 'H', 'H',
+  'K', null, 'H', 'K',   'S', 'H', 'K', 'H',
+  'K', 'K', 'S', 'H',   'S', 'K', 'S', 'S',
+];
+
+// Song structure: 8 phrases before full loop (A-A-B-A-B-B-C-A)
+const songStructure = [0, 0, 1, 0, 1, 1, 2, 0]; // indexes into theme arrays
+const themes = [themeA, themeB, themeC];
+const basses = [bassA, bassB, bassC];
+
+// ── Beat tick ─────────────────────────────────────────────────────────
 
 function tick() {
-  const beatInPattern = currentBeat % 32;
-  const melody = phraseIndex % 2 === 0 ? melodyPattern : melodyPattern2;
+  const beatInPhrase = currentBeat % 32;
+  const structureIndex = phraseIndex % songStructure.length;
+  const themeIdx = songStructure[structureIndex];
+
+  const melody = themes[themeIdx];
+  const bass = basses[themeIdx];
+  const drums = themeIdx === 2 ? drumIntense : drumMain;
+
+  // Crash on phrase start
+  if (beatInPhrase === 0 && phraseIndex > 0) {
+    playCrash(0.5);
+  }
 
   // Drums
-  const drum = drumPattern[beatInPattern];
-  if (drum === 'K') playDrum(150, 0.15, 0.6);
-  else if (drum === 'S') playDrum(200, 0.12, 0.5, true);
-  else if (drum === 'H') playDrum(800, 0.04, 0.15, true);
+  const drum = drums[beatInPhrase];
+  if (drum === 'K') playKick(0.55);
+  else if (drum === 'S') playSnare(0.45);
+  else if (drum === 'H') playHihat(0.4);
 
-  // Bass
-  const bassNote = bassPattern[beatInPattern];
-  if (bassNote) playBass(NOTE[bassNote], 0.3, 0.35);
+  // Bass (triangle)
+  const bassNote = bass[beatInPhrase];
+  if (bassNote && NOTE[bassNote]) {
+    playBass(NOTE[bassNote], 0.25, 0.3);
+  }
 
-  // Melody (brass)
-  const melNote = melody[beatInPattern];
-  if (melNote) {
-    const dur = 0.18;
-    playBrass(NOTE[melNote], dur, 0.2);
+  // Lead melody (pulse/square with vibrato)
+  const melNote = melody[beatInPhrase];
+  if (melNote && NOTE[melNote]) {
+    playLead(NOTE[melNote], 0.18, 0.18);
+  }
+
+  // Arpeggios (only on theme A phrases, every 8 beats)
+  if (themeIdx === 0 && arpA[beatInPhrase]) {
+    const chord = arpA[beatInPhrase]!;
+    const freqs = chord.map((n) => NOTE[n]).filter(Boolean);
+    if (freqs.length === 3) {
+      playArpeggio(freqs, 0.04, 0.25, 0.12);
+    }
   }
 
   currentBeat++;
-  if (beatInPattern === 31) {
+  if (beatInPhrase === 31) {
     phraseIndex++;
   }
 }
 
-/** Start the music loop */
+// ── Public API (unchanged signatures) ────────────────────────────────
+
 export function startMusic(volume: number) {
   if (isPlaying) return;
   isPlaying = true;
@@ -218,28 +365,22 @@ export function startMusic(volume: number) {
   getCtx();
   if (masterGain) masterGain.gain.value = volume;
 
-  const beatDuration = 60 / bpm / 2; // 8th note duration
-  const id = window.setInterval(tick, beatDuration * 1000);
-  intervalIds.push(id);
+  const eighthNote = 60 / bpm / 2;
+  intervalId = window.setInterval(tick, eighthNote * 1000);
 }
 
-/** Stop the music */
 export function stopMusic() {
   isPlaying = false;
-  for (const id of intervalIds) clearInterval(id);
-  intervalIds = [];
-  for (const osc of oscillators) {
-    try { osc.stop(); } catch { /* already stopped */ }
+  if (intervalId !== null) {
+    clearInterval(intervalId);
+    intervalId = null;
   }
-  oscillators = [];
 }
 
-/** Update music volume (0-1) */
 export function setMusicVolume(volume: number) {
   if (masterGain) masterGain.gain.value = volume;
 }
 
-/** Check if music is playing */
 export function isMusicPlaying(): boolean {
   return isPlaying;
 }

@@ -13,7 +13,9 @@ import { StatsOverview } from './components/stats/StatsOverview';
 import { Button } from './components/ui/Button';
 import { ScanlineOverlay } from './components/ui/ScanlineOverlay';
 import { AmbientParticles } from './components/ui/AmbientParticles';
+import { FactionBackground } from './components/ui/FactionBackground';
 import { useAudio } from './hooks/useAudio';
+import { useFactionStore } from './stores/factionStore';
 
 function shuffleArray<T>(arr: T[], rng: () => number = Math.random): T[] {
   const shuffled = [...arr];
@@ -40,6 +42,7 @@ export default function App() {
   const [gameQueue, setGameQueue] = useState<Stratagem[]>([]);
   const settings = useSettingsStore();
   const audio = useAudio();
+  const activeFaction = useFactionStore((s) => s.activeFaction);
 
   const handleModeSelect = useCallback((mode: GameMode) => {
     audio.menuClick();
@@ -107,9 +110,10 @@ export default function App() {
   const reducedMotion = useSettingsStore((s) => s.reducedMotion);
 
   return (
-    <div className="h-full flex flex-col relative z-10">
+    <div className="h-full flex flex-col relative z-10" data-faction={activeFaction ?? undefined}>
       {/* Global ambient effects */}
       {!reducedMotion && <AmbientParticles />}
+      <FactionBackground />
       <ScanlineOverlay />
 
       <Header

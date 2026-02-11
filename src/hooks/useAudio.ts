@@ -59,6 +59,17 @@ export function useAudio() {
     if (vol > 0) audio.playRecordFanfare(vol);
   }, [vol]);
 
+  const powerSurge = useCallback(
+    (multiplier: number) => {
+      if (vol > 0) audio.playPowerSurge(multiplier, vol);
+    },
+    [vol],
+  );
+
+  const orbitalStrike = useCallback(() => {
+    if (vol > 0) audio.playOrbitalStrike(vol);
+  }, [vol]);
+
   return {
     inputBeep,
     successJingle,
@@ -71,5 +82,7 @@ export function useAudio() {
     countdownBeep,
     deploySound,
     recordFanfare,
+    powerSurge,
+    orbitalStrike,
   };
 }

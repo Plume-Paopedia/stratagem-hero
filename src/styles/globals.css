@@ -134,6 +134,35 @@ html, body, #root {
 .animate-float-up { animation: float-up 0.8s ease-out forwards; }
 .animate-countdown { animation: countdown-zoom 0.8s ease-out forwards; }
 
+/* Faction dynamic theming */
+:root {
+  --faction-primary: var(--color-hd-yellow);
+  --faction-secondary: var(--color-hd-yellow-dim);
+  --faction-accent: var(--color-hd-green);
+  --faction-glow: rgba(245, 197, 24, 0.5);
+}
+
+[data-faction="terminids"] {
+  --faction-primary: #f5a623;
+  --faction-secondary: #8b6914;
+  --faction-accent: #39ff14;
+  --faction-glow: rgba(245, 166, 35, 0.5);
+}
+
+[data-faction="automatons"] {
+  --faction-primary: #ff2222;
+  --faction-secondary: #8b1a1a;
+  --faction-accent: #ff6600;
+  --faction-glow: rgba(255, 34, 34, 0.5);
+}
+
+[data-faction="illuminate"] {
+  --faction-primary: #8b5cf6;
+  --faction-secondary: #3b0a8b;
+  --faction-accent: #06b6d4;
+  --faction-glow: rgba(139, 92, 246, 0.5);
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

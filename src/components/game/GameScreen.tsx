@@ -4,8 +4,10 @@ import type { Direction, Stratagem, GameMode, StratagemAttempt } from '../../typ
 import { useStratagemInput } from '../../hooks/useStratagemInput';
 import { useAudio } from '../../hooks/useAudio';
 import { useTimer } from '../../hooks/useTimer';
+import { useScreenShake } from '../../hooks/useScreenShake';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { useStatsStore } from '../../stores/statsStore';
+import { useFactionStore } from '../../stores/factionStore';
 import { getStreakMultiplier, calculateScore, calculateAccuracy } from '../../utils/scoring';
 import { ComboDisplay } from '../stratagem/ComboDisplay';
 import { InputFeedback } from '../stratagem/InputFeedback';
@@ -13,6 +15,7 @@ import { ParticleEffect } from '../ui/ParticleEffect';
 import { HellpodDrop } from '../ui/HellpodDrop';
 import { StreakFire } from '../ui/StreakFire';
 import { GlitchEffect } from '../ui/GlitchEffect';
+import { StreakAnnouncement } from '../ui/StreakAnnouncement';
 import { Countdown } from './Countdown';
 import { Timer } from './Timer';
 import { ScoreDisplay } from './ScoreDisplay';
@@ -29,6 +32,12 @@ interface GameScreenProps {
 export function GameScreen({ mode, queue, onExit }: GameScreenProps) {
   const audio = useAudio();
   const timeAttackDuration = useSettingsStore((s) => s.timeAttackDuration);
+  const randomizeFaction = useFactionStore((s) => s.randomizeFaction);
+  const setFaction = useFactionStore((s) => s.setFaction);
+
+  // Screen shake
+  const shakeRef = useRef<HTMLDivElement>(null);
+  const { shake, startContinuousShake, stopContinuousShake } = useScreenShake(shakeRef);
 
   // Local game state
   const [state, setState] = useState<'countdown' | 'playing' | 'game-over'>('countdown');
@@ -45,6 +54,7 @@ export function GameScreen({ mode, queue, onExit }: GameScreenProps) {
   const [particleTrigger, setParticleTrigger] = useState(0);
   const [hellpodTrigger, setHellpodTrigger] = useState(0);
   const [glitchTrigger, setGlitchTrigger] = useState(0);
+  const [streakAnnounceTrigger, setStreakAnnounceTrigger] = useState(0);
   const [lastCompletedName, setLastCompletedName] = useState('');
   const [lives, setLives] = useState(3);
   const [survivalTimeLimit, setSurvivalTimeLimit] = useState(8000);
@@ -89,8 +99,10 @@ export function GameScreen({ mode, queue, onExit }: GameScreenProps) {
   const endGame = useCallback(() => {
     setState('game-over');
     audio.gameOver();
+    stopContinuousShake();
+    setFaction(null);
     totalTimeRef.current = useCountdownTimer ? timerInitialMs - timeMs : elapsedMs;
-  }, [audio, timerInitialMs, timeMs, elapsedMs, useCountdownTimer]);
+  }, [audio, timerInitialMs, timeMs, elapsedMs, useCountdownTimer, stopContinuousShake, setFaction]);
 
   const handleCorrectInput = useCallback(
     (_dir: Direction, idx: number) => {
@@ -133,8 +145,20 @@ export function GameScreen({ mode, queue, onExit }: GameScreenProps) {
       setHellpodTrigger((t) => t + 1);
       setLastCompletedName(strat.name);
 
+      // Screen shake proportional to multiplier
+      shake({ intensity: newMult * 2, duration: 150 + newMult * 50 });
+
+      // Power audio at high multipliers
+      if (newMult >= 3) {
+        audio.powerSurge(newMult);
+      }
+      if (newMult >= 4) {
+        audio.orbitalStrike();
+      }
+
       if (newMult > multiplier) {
         audio.streakUp(newMult);
+        setStreakAnnounceTrigger((t) => t + 1);
       }
 
       // Advance to next
@@ -157,7 +181,7 @@ export function GameScreen({ mode, queue, onExit }: GameScreenProps) {
         resetTimer(survivalTimeLimit);
       }
     },
-    [streak, multiplier, currentIndex, queue.length, mode, audio, endGame, resetTimer, survivalTimeLimit],
+    [streak, multiplier, currentIndex, queue.length, mode, audio, endGame, resetTimer, survivalTimeLimit, shake],
   );
 
   const handleError = useCallback(
@@ -174,6 +198,7 @@ export function GameScreen({ mode, queue, onExit }: GameScreenProps) {
       }
       setStreak(0);
       setMultiplier(1);
+      stopContinuousShake();
 
       // Quiz mode: lose life
       if (mode === 'quiz') {
@@ -193,7 +218,7 @@ export function GameScreen({ mode, queue, onExit }: GameScreenProps) {
       // Clear error indicator after delay
       setTimeout(() => setError(false), 300);
     },
-    [streak, mode, lives, audio, endGame],
+    [streak, mode, lives, audio, endGame, stopContinuousShake],
   );
 
   useStratagemInput({
@@ -203,6 +228,15 @@ export function GameScreen({ mode, queue, onExit }: GameScreenProps) {
     onComboComplete: handleComboComplete,
     onError: handleError,
   });
+
+  // Continuous shake at x4
+  useEffect(() => {
+    if (isPlaying && multiplier >= 4) {
+      startContinuousShake(1.5);
+    } else {
+      stopContinuousShake();
+    }
+  }, [isPlaying, multiplier, startContinuousShake, stopContinuousShake]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -265,18 +299,20 @@ export function GameScreen({ mode, queue, onExit }: GameScreenProps) {
     if (useCountdownTimer) {
       resetTimer(timerInitialMs);
     }
+    randomizeFaction();
     setState('playing');
-  }, [resetTimer, timerInitialMs, useCountdownTimer]);
+  }, [resetTimer, timerInitialMs, useCountdownTimer, randomizeFaction]);
 
   const isNewRecord = state === 'game-over' && score > (bestScores[mode] ?? 0) && score > 0;
 
   return (
-    <div className="relative h-full flex flex-col">
+    <div ref={shakeRef} className="relative h-full flex flex-col">
       {/* Visual effects layers */}
-      <InputFeedback successTrigger={successTrigger} errorTrigger={errorTrigger} />
-      <HellpodDrop trigger={hellpodTrigger} stratagemName={lastCompletedName} />
+      <InputFeedback successTrigger={successTrigger} errorTrigger={errorTrigger} multiplier={multiplier} />
+      <HellpodDrop trigger={hellpodTrigger} stratagemName={lastCompletedName} multiplier={multiplier} />
       <GlitchEffect trigger={glitchTrigger} />
       <StreakFire multiplier={multiplier} active={isPlaying} />
+      <StreakAnnouncement multiplier={multiplier} trigger={streakAnnounceTrigger} />
 
       {/* Countdown */}
       <AnimatePresence>
@@ -336,7 +372,7 @@ export function GameScreen({ mode, queue, onExit }: GameScreenProps) {
               showName={true}
               hideSequence={mode === 'quiz'}
             />
-            <ParticleEffect trigger={particleTrigger} />
+            <ParticleEffect trigger={particleTrigger} multiplier={multiplier} />
 
             {mode === 'quiz' && (
               <p className="text-sm text-hd-gray mt-2 text-center">Enter the combo from memory!</p>
