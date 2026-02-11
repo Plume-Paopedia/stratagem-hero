@@ -44,10 +44,10 @@ export function CustomModeBuilder({ onStart, onClose, initialConfig }: CustomMod
     <div className="h-full flex flex-col gap-4 p-6">
       <div className="flex items-center justify-between">
         <h2 className="font-display text-xl text-hd-yellow uppercase tracking-wider">
-          Custom Mode
+          Mode Personnalise
         </h2>
         <div className="flex gap-2">
-          <Button variant="ghost" size="sm" onClick={onClose}>Back</Button>
+          <Button variant="ghost" size="sm" onClick={onClose}>Retour</Button>
         </div>
       </div>
 
@@ -58,7 +58,7 @@ export function CustomModeBuilder({ onStart, onClose, initialConfig }: CustomMod
         onChange={(e) => update('name', e.target.value)}
         maxLength={30}
         className="bg-hd-dark border border-hd-border rounded px-3 py-2 text-hd-white font-heading text-sm focus:border-hd-yellow outline-none"
-        placeholder="Mode name..."
+        placeholder="Nom du mode..."
       />
 
       {/* Tabs */}
@@ -71,7 +71,7 @@ export function CustomModeBuilder({ onStart, onClose, initialConfig }: CustomMod
               tab === t ? 'bg-hd-yellow/10 text-hd-yellow border border-hd-yellow' : 'text-hd-gray border border-hd-border hover:text-hd-white'
             }`}
           >
-            {t}
+            {{ timer: 'chrono', rules: 'regles', queue: 'file', presets: 'presets' }[t]}
           </button>
         ))}
       </div>
@@ -80,20 +80,20 @@ export function CustomModeBuilder({ onStart, onClose, initialConfig }: CustomMod
       <div className="flex-1 overflow-y-auto">
         {tab === 'timer' && (
           <div className="flex flex-col gap-4">
-            <FieldGroup label="Timer Type">
+            <FieldGroup label="Type de Chrono">
               <RadioGroup
                 value={config.timerType}
                 onChange={(v) => update('timerType', v as CustomModeConfig['timerType'])}
                 options={[
-                  { value: 'none', label: 'No Timer' },
-                  { value: 'countdown', label: 'Countdown' },
-                  { value: 'countup', label: 'Count Up' },
-                  { value: 'survival', label: 'Survival (reset)' },
+                  { value: 'none', label: 'Pas de Chrono' },
+                  { value: 'countdown', label: 'Compte a Rebours' },
+                  { value: 'countup', label: 'Chrono Croissant' },
+                  { value: 'survival', label: 'Survie (reset)' },
                 ]}
               />
             </FieldGroup>
             {(config.timerType === 'countdown' || config.timerType === 'survival') && (
-              <FieldGroup label={`Duration: ${config.timerDuration}s`}>
+              <FieldGroup label={`Duree : ${config.timerDuration}s`}>
                 <input
                   type="range"
                   min={5}
@@ -105,7 +105,7 @@ export function CustomModeBuilder({ onStart, onClose, initialConfig }: CustomMod
                 />
               </FieldGroup>
             )}
-            <FieldGroup label={`Score Multiplier: ${config.scoreMultiplier}x`}>
+            <FieldGroup label={`Multiplicateur de Score : ${config.scoreMultiplier}x`}>
               <input
                 type="range"
                 min={0.5}
@@ -121,7 +121,7 @@ export function CustomModeBuilder({ onStart, onClose, initialConfig }: CustomMod
 
         {tab === 'rules' && (
           <div className="flex flex-col gap-4">
-            <FieldGroup label={`Lives: ${config.lives === 0 ? 'Unlimited' : config.lives}`}>
+            <FieldGroup label={`Vies : ${config.lives === 0 ? 'Illimitees' : config.lives}`}>
               <input
                 type="range"
                 min={0}
@@ -131,20 +131,20 @@ export function CustomModeBuilder({ onStart, onClose, initialConfig }: CustomMod
                 className="w-full accent-hd-yellow"
               />
             </FieldGroup>
-            <FieldGroup label="On Error">
+            <FieldGroup label="En Cas d'Erreur">
               <RadioGroup
                 value={config.errorBehavior}
                 onChange={(v) => update('errorBehavior', v as CustomModeConfig['errorBehavior'])}
                 options={[
-                  { value: 'reset-streak', label: 'Reset Streak' },
-                  { value: 'lose-life', label: 'Lose a Life' },
-                  { value: 'time-penalty', label: 'Time Penalty' },
+                  { value: 'reset-streak', label: 'Reset Serie' },
+                  { value: 'lose-life', label: 'Perdre une Vie' },
+                  { value: 'time-penalty', label: 'Penalite de Temps' },
                   { value: 'end-game', label: 'Game Over' },
                 ]}
               />
             </FieldGroup>
             {config.errorBehavior === 'time-penalty' && (
-              <FieldGroup label={`Penalty: ${(config.timePenaltyMs / 1000).toFixed(1)}s`}>
+              <FieldGroup label={`Penalite : ${(config.timePenaltyMs / 1000).toFixed(1)}s`}>
                 <input
                   type="range"
                   min={500}
@@ -161,19 +161,19 @@ export function CustomModeBuilder({ onStart, onClose, initialConfig }: CustomMod
 
         {tab === 'queue' && (
           <div className="flex flex-col gap-4">
-            <FieldGroup label="Stratagem Source">
+            <FieldGroup label="Source des Stratagemes">
               <RadioGroup
                 value={config.queueSource}
                 onChange={(v) => update('queueSource', v as CustomModeConfig['queueSource'])}
                 options={[
-                  { value: 'all', label: 'All Stratagems' },
-                  { value: 'category', label: 'By Category' },
-                  { value: 'tier', label: 'By Tier' },
+                  { value: 'all', label: 'Tous les Stratagemes' },
+                  { value: 'category', label: 'Par Categorie' },
+                  { value: 'tier', label: 'Par Tier' },
                 ]}
               />
             </FieldGroup>
             {config.queueSource === 'category' && (
-              <FieldGroup label="Category">
+              <FieldGroup label="Categorie">
                 <select
                   value={config.category ?? ''}
                   onChange={(e) => update('category', e.target.value as StratagemCategory)}
@@ -191,14 +191,14 @@ export function CustomModeBuilder({ onStart, onClose, initialConfig }: CustomMod
                   value={config.tier ?? 'basic'}
                   onChange={(v) => update('tier', v as StratagemTier)}
                   options={[
-                    { value: 'basic', label: 'Basic' },
-                    { value: 'advanced', label: 'Advanced' },
+                    { value: 'basic', label: 'Basique' },
+                    { value: 'advanced', label: 'Avance' },
                     { value: 'expert', label: 'Expert' },
                   ]}
                 />
               </FieldGroup>
             )}
-            <FieldGroup label={`Queue Length: ${config.queueLength === 0 ? 'All' : config.queueLength}`}>
+            <FieldGroup label={`Taille de la File : ${config.queueLength === 0 ? 'Tous' : config.queueLength}`}>
               <input
                 type="range"
                 min={0}
@@ -215,7 +215,7 @@ export function CustomModeBuilder({ onStart, onClose, initialConfig }: CustomMod
                 onChange={(e) => update('shuffle', e.target.checked)}
                 className="accent-hd-yellow"
               />
-              <span className="font-heading">Shuffle queue</span>
+              <span className="font-heading">Melanger la file</span>
             </label>
           </div>
         )}
@@ -228,13 +228,13 @@ export function CustomModeBuilder({ onStart, onClose, initialConfig }: CustomMod
       {/* Actions */}
       <div className="flex gap-2 border-t border-hd-border pt-3">
         <Button variant="primary" onClick={() => onStart(config)}>
-          Play
+          Jouer
         </Button>
         <Button variant="secondary" size="sm" onClick={handleSave}>
-          Save Preset
+          Sauvegarder
         </Button>
         <Button variant="ghost" size="sm" onClick={handleShare}>
-          {copied ? 'Copied!' : 'Share URL'}
+          {copied ? 'Copie !' : 'Partager l\'URL'}
         </Button>
       </div>
     </div>

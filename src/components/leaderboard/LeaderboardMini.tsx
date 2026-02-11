@@ -23,7 +23,7 @@ export function LeaderboardMini({ mode, highlightScore }: LeaderboardMiniProps) 
       transition={{ delay: 0.6 }}
     >
       <div className="text-xs font-heading uppercase tracking-wider text-hd-gray mb-2 text-center">
-        Top Scores
+        Meilleurs Scores
       </div>
 
       <div className="border border-hd-border/50 rounded overflow-hidden">

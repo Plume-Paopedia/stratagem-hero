@@ -34,7 +34,7 @@ export function StratagemGrid({ selected, onToggle, multiSelect = true }: Strata
       {/* Search */}
       <input
         type="text"
-        placeholder="Search stratagems..."
+        placeholder="Rechercher..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         className="w-full bg-hd-dark border border-hd-border rounded px-4 py-2
@@ -66,7 +66,7 @@ export function StratagemGrid({ selected, onToggle, multiSelect = true }: Strata
       {/* Selection count */}
       {multiSelect && (
         <div className="text-sm text-hd-gray font-heading">
-          {selected.size} selected
+          {selected.size} selectionne(s)
         </div>
       )}
 

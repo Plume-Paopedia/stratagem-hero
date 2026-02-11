@@ -8,13 +8,13 @@ interface KeybindEditorProps {
 }
 
 const bindingLabels: Record<keyof KeyBindings, string> = {
-  up: 'Up',
-  down: 'Down',
-  left: 'Left',
-  right: 'Right',
-  confirm: 'Confirm',
-  back: 'Back / Pause',
-  restart: 'Restart',
+  up: 'Haut',
+  down: 'Bas',
+  left: 'Gauche',
+  right: 'Droite',
+  confirm: 'Confirmer',
+  back: 'Retour / Pause',
+  restart: 'Rejouer',
   pause: 'Pause',
 };
 
@@ -58,9 +58,9 @@ export function KeybindEditor({ onBack }: KeybindEditorProps) {
   return (
     <div className="flex flex-col gap-4 max-w-md mx-auto w-full p-6">
       <h2 className="font-display text-2xl text-hd-yellow uppercase tracking-wider">
-        Key Bindings
+        Configuration des Touches
       </h2>
-      <p className="text-sm text-hd-gray">Click a binding to add a new key. Click a key to remove it.</p>
+      <p className="text-sm text-hd-gray">Cliquez sur une touche pour en ajouter. Cliquez sur une touche pour la retirer.</p>
 
       <div className="flex flex-col gap-3">
         {(Object.keys(bindingLabels) as (keyof KeyBindings)[]).map((action) => (
@@ -75,7 +75,7 @@ export function KeybindEditor({ onBack }: KeybindEditorProps) {
                   onClick={() => removeKey(action, code)}
                   className="px-2 py-1 text-xs font-mono bg-hd-dark border border-hd-border rounded
                              hover:border-hd-red hover:text-hd-red transition-colors cursor-pointer"
-                  title="Click to remove"
+                  title="Cliquer pour retirer"
                 >
                   {formatKeyCode(code)}
                 </button>
@@ -88,7 +88,7 @@ export function KeybindEditor({ onBack }: KeybindEditorProps) {
                     : 'bg-hd-dark border-hd-border text-hd-gray hover:text-hd-white'
                 }`}
               >
-                {listening === action ? 'Press a key...' : '+'}
+                {listening === action ? 'Appuyez...' : '+'}
               </button>
             </div>
           </div>
@@ -96,7 +96,7 @@ export function KeybindEditor({ onBack }: KeybindEditorProps) {
       </div>
 
       <Button variant="ghost" onClick={onBack} className="mt-4">
-        Back
+        Retour
       </Button>
     </div>
   );

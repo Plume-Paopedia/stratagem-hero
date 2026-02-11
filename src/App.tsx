@@ -45,17 +45,17 @@ function shuffleArray<T>(arr: T[], rng: () => number = Math.random): T[] {
 }
 
 const gameModes: { id: GameMode; name: string; icon: string; desc: string }[] = [
-  { id: 'free-practice', name: 'Free Practice', icon: '\u{1F3CB}\uFE0F', desc: 'Practice at your own pace. No timer, no pressure.' },
-  { id: 'time-attack', name: 'Time Attack', icon: '\u23F1\uFE0F', desc: 'Score as many combos as possible before time runs out.' },
-  { id: 'accuracy', name: 'Accuracy Challenge', icon: '\u{1F3AF}', desc: 'Complete a set number of combos with maximum precision.' },
-  { id: 'survival', name: 'Survival', icon: '\u{1F525}', desc: 'Endless combos with decreasing time limits. One mistake = game over.' },
-  { id: 'quiz', name: 'Quiz', icon: '\u{1F4DA}', desc: 'Enter combos from memory. Only the name is shown. 3 lives.' },
-  { id: 'daily-challenge', name: 'Daily Challenge', icon: '\u{1F3B2}', desc: 'Same challenge for everyone today. One attempt!' },
-  { id: 'speed-run', name: 'Speed Run', icon: '\u{1F3C3}', desc: 'Complete all 61 stratagems ASAP. Errors add +2s penalty.' },
-  { id: 'endless', name: 'Endless', icon: '\u267E\uFE0F', desc: 'Timer resets on success. Errors subtract 3s. How far can you go?' },
-  { id: 'category-challenge', name: 'Category', icon: '\u{1F4C2}', desc: 'Master one category. Pick your specialty and race the clock.' },
-  { id: 'boss-rush', name: 'Boss Rush', icon: '\u{1F480}', desc: 'Every 10 combos a boss appears. Harder combos, double points.' },
-  { id: 'custom', name: 'Custom', icon: '\u{1F6E0}\uFE0F', desc: 'Build your own rules. Save presets. Share via URL.' },
+  { id: 'free-practice', name: 'Entrainement Libre', icon: '\u{1F3CB}\uFE0F', desc: 'Pratiquez a votre rythme. Pas de chrono, pas de pression.' },
+  { id: 'time-attack', name: 'Contre-la-Montre', icon: '\u23F1\uFE0F', desc: 'Marquez un max de combos avant la fin du temps.' },
+  { id: 'accuracy', name: 'Defi Precision', icon: '\u{1F3AF}', desc: 'Completez un nombre defini de combos avec un max de precision.' },
+  { id: 'survival', name: 'Survie', icon: '\u{1F525}', desc: 'Combos infinis avec un chrono qui retrecit. Une erreur = game over.' },
+  { id: 'quiz', name: 'Quiz', icon: '\u{1F4DA}', desc: 'Entrez les combos de memoire. Seul le nom est affiche. 3 vies.' },
+  { id: 'daily-challenge', name: 'Defi du Jour', icon: '\u{1F3B2}', desc: 'Meme defi pour tout le monde aujourd\'hui. Une seule tentative !' },
+  { id: 'speed-run', name: 'Speed Run', icon: '\u{1F3C3}', desc: 'Completez les 61 stratagemes le plus vite possible. Erreurs = +2s.' },
+  { id: 'endless', name: 'Infini', icon: '\u267E\uFE0F', desc: 'Le chrono se reinitialise a chaque succes. Erreurs = -3s.' },
+  { id: 'category-challenge', name: 'Categorie', icon: '\u{1F4C2}', desc: 'Maitrisez une categorie. Choisissez votre specialite et battez le chrono.' },
+  { id: 'boss-rush', name: 'Boss Rush', icon: '\u{1F480}', desc: 'Tous les 10 combos un boss apparait. Combos plus durs, points doubles.' },
+  { id: 'custom', name: 'Personnalise', icon: '\u{1F6E0}\uFE0F', desc: 'Creez vos propres regles. Sauvegardez des presets. Partagez par URL.' },
 ];
 
 export default function App() {
@@ -247,11 +247,11 @@ export default function App() {
                 <div className="h-full flex flex-col gap-4 p-6">
                   <div className="flex items-center justify-between">
                     <h2 className="font-display text-xl text-hd-yellow uppercase tracking-wider">
-                      Select Stratagems
+                      Selection des Stratagemes
                     </h2>
                     <div className="flex gap-2">
                       <Button variant="ghost" size="sm" onClick={handleSelectAll}>
-                        {selectedStratagems.size === stratagems.length ? 'Deselect All' : 'Select All'}
+                        {selectedStratagems.size === stratagems.length ? 'Tout deselectionner' : 'Tout selectionner'}
                       </Button>
                       <Button
                         variant="primary"
@@ -259,7 +259,7 @@ export default function App() {
                         onClick={handleStartFreePractice}
                         disabled={selectedStratagems.size === 0}
                       >
-                        Start ({selectedStratagems.size})
+                        Jouer ({selectedStratagems.size})
                       </Button>
                     </div>
                   </div>
@@ -376,7 +376,7 @@ function MainMenu({ onModeSelect }: { onModeSelect: (mode: GameMode) => void }) 
           Stratagem Hero
         </h1>
         <p className="font-heading text-hd-gray mt-2 tracking-wider uppercase text-sm">
-          Helldivers 2 Combo Trainer
+          Entraineur de Combos Helldivers 2
         </p>
       </motion.div>
 
@@ -411,7 +411,7 @@ function MainMenu({ onModeSelect }: { onModeSelect: (mode: GameMode) => void }) 
       </motion.div>
 
       <div className="text-xs text-hd-gray/30 text-center font-heading uppercase tracking-wider md:hidden">
-        Best experienced with a keyboard or gamepad
+        Meilleure experience au clavier ou a la manette
       </div>
     </div>
   );

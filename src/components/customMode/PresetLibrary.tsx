@@ -13,7 +13,7 @@ export function PresetLibrary({ onLoad }: PresetLibraryProps) {
   if (presets.length === 0) {
     return (
       <div className="text-center py-8 text-hd-gray font-heading text-sm">
-        No saved presets yet. Create one and hit "Save Preset"!
+        Aucun preset sauvegarde. Creez-en un et cliquez "Sauvegarder" !
       </div>
     );
   }
@@ -32,7 +32,7 @@ export function PresetLibrary({ onLoad }: PresetLibraryProps) {
             </div>
             <div className="text-xs text-hd-gray">
               {preset.config.timerType} | {preset.config.queueSource}
-              {preset.config.lives > 0 ? ` | ${preset.config.lives} lives` : ''}
+              {preset.config.lives > 0 ? ` | ${preset.config.lives} vies` : ''}
               {' | '}{new Date(preset.createdAt).toLocaleDateString()}
             </div>
           </div>
@@ -41,13 +41,13 @@ export function PresetLibrary({ onLoad }: PresetLibraryProps) {
               onClick={() => onLoad(preset.config)}
               className="px-2 py-1 text-xs font-heading text-hd-yellow border border-hd-yellow/50 rounded hover:bg-hd-yellow/10 cursor-pointer transition-colors"
             >
-              Load
+              Charger
             </button>
             <button
               onClick={() => deletePreset(preset.id)}
               className="px-2 py-1 text-xs font-heading text-hd-red border border-hd-red/50 rounded hover:bg-hd-red/10 cursor-pointer transition-colors"
             >
-              Del
+              Suppr
             </button>
           </div>
         </motion.div>

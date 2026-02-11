@@ -9,17 +9,17 @@ interface StreakAnnouncementProps {
 
 const ANNOUNCEMENTS: Record<number, { text: string; color: string; glowColor: string }> = {
   2: {
-    text: 'DOUBLE TIME',
+    text: 'CADENCE DOUBLE',
     color: 'text-hd-yellow',
     glowColor: 'rgba(245,197,24,0.5)',
   },
   3: {
-    text: 'FIRE SUPERIORITY',
+    text: 'SUPERIORITE DE FEU',
     color: 'text-orange-400',
     glowColor: 'rgba(255,150,50,0.5)',
   },
   4: {
-    text: 'ORBITAL AUTHORITY',
+    text: 'AUTORITE ORBITALE',
     color: 'text-hd-red',
     glowColor: 'rgba(255,51,51,0.6)',
   },
@@ -102,7 +102,7 @@ export function StreakAnnouncement({ multiplier, trigger }: StreakAnnouncementPr
           animate={{ opacity: [0, 0.8, 0.8, 0], y: 0 }}
           transition={{ duration: duration * 0.8, delay: 0.1, times: [0, 0.2, 0.6, 1] }}
         >
-          x{m} MULTIPLIER
+          x{m} MULTIPLICATEUR
         </motion.div>
 
         {/* x4: Faction icon */}

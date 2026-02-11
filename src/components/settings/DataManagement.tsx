@@ -22,9 +22,9 @@ export function DataManagement() {
     reader.onload = () => {
       const result = importData(reader.result as string);
       if (result.success) {
-        setImportStatus('Import successful! Reload to apply changes.');
+        setImportStatus('Import reussi ! Rechargez pour appliquer.');
       } else {
-        setImportStatus(`Error: ${result.error}`);
+        setImportStatus(`Erreur : ${result.error}`);
       }
     };
     reader.readAsText(file);
@@ -36,17 +36,17 @@ export function DataManagement() {
   return (
     <div className="flex flex-col gap-3">
       <h3 className="font-heading text-sm text-hd-gray uppercase tracking-wider">
-        Data Management
+        Gestion des Donnees
       </h3>
       <div className="text-xs text-hd-gray/60">
-        Local storage: ~{sizeKB}KB used
+        Stockage local : ~{sizeKB}Ko utilises
       </div>
       <div className="flex gap-2">
         <Button variant="secondary" size="sm" onClick={handleExport}>
-          Export All Data
+          Exporter les Donnees
         </Button>
         <Button variant="secondary" size="sm" onClick={handleImport}>
-          Import Backup
+          Importer une Sauvegarde
         </Button>
         <input
           ref={fileRef}
@@ -57,7 +57,7 @@ export function DataManagement() {
         />
       </div>
       {importStatus && (
-        <div className={`text-xs font-heading ${importStatus.startsWith('Error') ? 'text-hd-red' : 'text-green-400'}`}>
+        <div className={`text-xs font-heading ${importStatus.startsWith('Erreur') ? 'text-hd-red' : 'text-green-400'}`}>
           {importStatus}
         </div>
       )}

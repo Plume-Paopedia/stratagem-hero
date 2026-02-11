@@ -40,12 +40,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         <div className="flex flex-col items-center justify-center gap-6 p-8 h-full text-center">
           <div className="text-5xl">&#x26A0;</div>
           <h2 className="font-display text-2xl text-hd-red uppercase tracking-widest">
-            {isGlobal ? 'Critical System Failure' : 'Sector Malfunction'}
+            {isGlobal ? 'Defaillance Systeme Critique' : 'Dysfonctionnement de Secteur'}
           </h2>
           <p className="font-heading text-sm text-hd-gray max-w-md">
             {isGlobal
-              ? 'Super Earth Command has lost contact. Reinitialize systems to resume operations.'
-              : 'This sector encountered an error. Return to base or attempt recovery.'}
+              ? 'Le Commandement de Super Terre a perdu le contact. Reinitialisez les systemes pour reprendre les operations.'
+              : 'Ce secteur a rencontre une erreur. Retournez a la base ou tentez une recuperation.'}
           </p>
           {this.state.error && (
             <pre className="text-xs text-hd-gray/50 bg-hd-dark border border-hd-border rounded p-3 max-w-lg overflow-auto max-h-32">
@@ -54,11 +54,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           )}
           <div className="flex gap-3">
             <Button variant="primary" size="md" onClick={this.handleReset}>
-              {isGlobal ? 'Reinitialize' : 'Return to Base'}
+              {isGlobal ? 'Reinitialiser' : 'Retour a la Base'}
             </Button>
             {isGlobal && (
               <Button variant="secondary" size="md" onClick={() => window.location.reload()}>
-                Full Reboot
+                Redemarrage Complet
               </Button>
             )}
           </div>

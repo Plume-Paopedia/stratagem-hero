@@ -95,7 +95,7 @@ export function Countdown({ onComplete }: CountdownProps) {
         animate={{ opacity: [0.3, 0.7, 0.3] }}
         transition={{ duration: 2, repeat: Infinity }}
       >
-        {factionTheme ? `${factionTheme.name} Contact` : 'Orbital Lock'} — Acquired
+        {factionTheme ? `Contact ${factionTheme.name}` : 'Verrouillage Orbital'} — Acquis
       </motion.div>
 
       {/* Main countdown number */}
@@ -130,7 +130,7 @@ export function Countdown({ onComplete }: CountdownProps) {
               transition={{ duration: 0.3 }}
             >
               <span className="font-display text-5xl md:text-7xl text-hd-yellow tracking-[0.3em] drop-shadow-[0_0_60px_rgba(245,197,24,0.8)]">
-                DEPLOY!
+                DEPLOIEMENT !
               </span>
               {/* Explosion flash */}
               <motion.div
@@ -151,7 +151,7 @@ export function Countdown({ onComplete }: CountdownProps) {
         animate={{ opacity: [0.2, 0.5, 0.2] }}
         transition={{ duration: 1.5, repeat: Infinity }}
       >
-        {factionTheme ? factionTheme.tagline : 'Super Destroyer Standing By'}
+        {factionTheme ? factionTheme.tagline : 'Super Destroyer en Attente'}
       </motion.div>
     </div>
   );

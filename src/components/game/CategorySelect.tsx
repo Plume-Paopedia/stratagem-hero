@@ -25,9 +25,9 @@ export function CategorySelect({ onSelect, onBack }: CategorySelectProps) {
     <div className="flex flex-col items-center justify-center h-full gap-6 p-8">
       <div className="text-center">
         <h2 className="font-display text-xl text-hd-yellow uppercase tracking-wider">
-          Category Challenge
+          Defi Categorie
         </h2>
-        <p className="text-sm text-hd-gray mt-1">Complete all stratagems in a category as fast as possible</p>
+        <p className="text-sm text-hd-gray mt-1">Completez tous les stratagemes d'une categorie le plus vite possible</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl w-full">
@@ -50,7 +50,7 @@ export function CategorySelect({ onSelect, onBack }: CategorySelectProps) {
                 <span className="font-heading font-bold text-hd-white uppercase tracking-wider text-sm block">
                   {cat}
                 </span>
-                <span className="text-xs text-hd-gray">{count} stratagems</span>
+                <span className="text-xs text-hd-gray">{count} stratagemes</span>
               </div>
             </motion.button>
           );
@@ -58,7 +58,7 @@ export function CategorySelect({ onSelect, onBack }: CategorySelectProps) {
       </div>
 
       <Button variant="ghost" size="sm" onClick={onBack}>
-        Back
+        Retour
       </Button>
     </div>
   );

@@ -24,8 +24,8 @@ export function StreakIndicator({ streak, multiplier }: StreakIndicatorProps) {
   const isMax = multiplier >= 4;
 
   return (
-    <div className="flex items-center gap-3" aria-live="assertive" aria-label={`Streak: ${streak}, multiplier x${multiplier}`}>
-      <div className="text-xs text-hd-gray uppercase tracking-widest font-heading">Streak</div>
+    <div className="flex items-center gap-3" aria-live="assertive" aria-label={`Serie : ${streak}, multiplicateur x${multiplier}`}>
+      <div className="text-xs text-hd-gray uppercase tracking-widest font-heading">Serie</div>
       <AnimatePresence mode="popLayout">
         <motion.div
           key={streak}

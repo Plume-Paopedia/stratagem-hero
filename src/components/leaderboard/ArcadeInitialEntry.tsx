@@ -109,10 +109,10 @@ export function ArcadeInitialEntry({ score, rank, onConfirm, onCancel }: ArcadeI
         {/* Title */}
         <div className="text-center">
           <h2 className="font-display text-2xl text-hd-red uppercase tracking-[0.3em]">
-            Enter Your Initials
+            Entrez vos Initiales
           </h2>
           <p className="font-heading text-sm text-hd-gray uppercase tracking-wider mt-1">
-            High Score!
+            Meilleur Score !
           </p>
         </div>
 
@@ -180,16 +180,16 @@ export function ArcadeInitialEntry({ score, rank, onConfirm, onCancel }: ArcadeI
             {score.toLocaleString()}
           </div>
           <div className="font-heading text-sm text-hd-yellow/70 uppercase tracking-wider mt-1">
-            Rank #{rank}
+            Rang #{rank}
           </div>
         </div>
 
         {/* Controls hint */}
         <div className="flex flex-wrap justify-center gap-3 text-xs text-hd-gray/50 font-heading uppercase tracking-wider">
-          <span>↑↓ Letter</span>
-          <span>←→ Slot</span>
-          <span>Enter = OK</span>
-          <span>Esc = Skip</span>
+          <span>↑↓ Lettre</span>
+          <span>←→ Case</span>
+          <span>Entree = OK</span>
+          <span>Echap = Passer</span>
         </div>
 
         {/* Confirmed flash */}

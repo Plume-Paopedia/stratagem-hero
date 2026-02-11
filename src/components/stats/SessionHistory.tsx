@@ -6,17 +6,17 @@ interface SessionHistoryProps {
 }
 
 const modeLabels: Partial<Record<GameMode, string>> = {
-  'free-practice': 'Free Practice',
-  'time-attack': 'Time Attack',
-  'accuracy': 'Accuracy',
-  'survival': 'Survival',
+  'free-practice': 'Entrainement',
+  'time-attack': 'Contre-la-Montre',
+  'accuracy': 'Precision',
+  'survival': 'Survie',
   'quiz': 'Quiz',
-  'daily-challenge': 'Daily',
+  'daily-challenge': 'Defi du Jour',
   'speed-run': 'Speed Run',
-  'endless': 'Endless',
-  'category-challenge': 'Category',
+  'endless': 'Infini',
+  'category-challenge': 'Categorie',
   'boss-rush': 'Boss Rush',
-  'custom': 'Custom',
+  'custom': 'Personnalise',
 };
 
 export function SessionHistory({ sessions }: SessionHistoryProps) {
@@ -31,7 +31,7 @@ export function SessionHistory({ sessions }: SessionHistoryProps) {
   if (sessions.length === 0) {
     return (
       <div className="text-center py-8 text-hd-gray font-heading text-sm">
-        No sessions yet. Play a game to see history!
+        Aucune session. Jouez pour voir l'historique !
       </div>
     );
   }
@@ -48,7 +48,7 @@ export function SessionHistory({ sessions }: SessionHistoryProps) {
               : 'border-hd-border text-hd-gray hover:text-hd-white'
           }`}
         >
-          All
+          Tous
         </button>
         {modes.map((m) => (
           <button

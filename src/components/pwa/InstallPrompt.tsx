@@ -62,16 +62,16 @@ export function InstallPrompt() {
           <div className="flex items-start gap-3">
             <span className="text-2xl flex-shrink-0">&#x1F985;</span>
             <div className="flex-1 min-w-0">
-              <div className="font-heading font-bold text-sm text-hd-white">Install Stratagem Hero</div>
+              <div className="font-heading font-bold text-sm text-hd-white">Installer Stratagem Hero</div>
               <p className="text-xs text-hd-gray mt-1">
-                Add to your home screen for instant access, even offline.
+                Ajoutez a votre ecran d'accueil pour un acces instantane, meme hors-ligne.
               </p>
               <div className="flex gap-2 mt-3">
                 <Button variant="primary" size="sm" onClick={handleInstall}>
-                  Install
+                  Installer
                 </Button>
                 <Button variant="ghost" size="sm" onClick={handleDismiss}>
-                  Not now
+                  Plus tard
                 </Button>
               </div>
             </div>

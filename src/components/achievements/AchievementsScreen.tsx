@@ -11,8 +11,8 @@ interface AchievementsScreenProps {
 }
 
 const categoryLabels: Record<AchievementCategory, string> = {
-  speed: 'Speed',
-  streak: 'Streak',
+  speed: 'Vitesse',
+  streak: 'Serie',
   completion: 'Completion',
   score: 'Score',
   collection: 'Collection',
@@ -47,7 +47,7 @@ export function AchievementsScreen({ onClose }: AchievementsScreenProps) {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="font-display text-xl text-hd-yellow uppercase tracking-wider">
-            Achievements
+            Succes
           </h2>
           <div className="flex items-center gap-3 mt-1">
             <div className="w-32 h-2 bg-hd-border rounded-full overflow-hidden">
@@ -64,7 +64,7 @@ export function AchievementsScreen({ onClose }: AchievementsScreenProps) {
           </div>
         </div>
         <Button variant="ghost" size="sm" onClick={onClose}>
-          Close
+          Fermer
         </Button>
       </div>
 
@@ -73,7 +73,7 @@ export function AchievementsScreen({ onClose }: AchievementsScreenProps) {
         <FilterButton
           active={filter === 'all'}
           onClick={() => setFilter('all')}
-          label="All"
+          label="Tous"
         />
         {categoryOrder.map(cat => (
           <FilterButton
@@ -92,7 +92,7 @@ export function AchievementsScreen({ onClose }: AchievementsScreenProps) {
               showUnlockedOnly ? 'text-hd-yellow bg-hd-yellow/10' : 'text-hd-gray hover:text-hd-white'
             }`}
           >
-            {showUnlockedOnly ? 'Unlocked' : 'Show All'}
+            {showUnlockedOnly ? 'Debloques' : 'Voir Tout'}
           </button>
         </div>
       </div>
@@ -111,7 +111,7 @@ export function AchievementsScreen({ onClose }: AchievementsScreenProps) {
 
         {displayedAchievements.length === 0 && (
           <div className="text-center py-12 text-hd-gray font-heading">
-            No achievements to display.
+            Aucun succes a afficher.
           </div>
         )}
       </div>

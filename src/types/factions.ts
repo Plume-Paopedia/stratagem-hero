@@ -26,7 +26,7 @@ export const FACTIONS: Record<Faction, FactionTheme> = {
       bgGradient: 'radial-gradient(ellipse at center, rgba(245,166,35,0.06) 0%, transparent 70%)',
     },
     particleHues: [40, 50, 120],
-    tagline: 'SQUASH THE BUGS',
+    tagline: 'ECRASEZ LES INSECTES',
   },
   automatons: {
     id: 'automatons',
@@ -39,7 +39,7 @@ export const FACTIONS: Record<Faction, FactionTheme> = {
       bgGradient: 'radial-gradient(ellipse at center, rgba(255,34,34,0.06) 0%, transparent 70%)',
     },
     particleHues: [0, 15, 30],
-    tagline: 'CRUSH THE BOTS',
+    tagline: 'BROYEZ LES ROBOTS',
   },
   illuminate: {
     id: 'illuminate',
@@ -52,7 +52,7 @@ export const FACTIONS: Record<Faction, FactionTheme> = {
       bgGradient: 'radial-gradient(ellipse at center, rgba(139,92,246,0.06) 0%, transparent 70%)',
     },
     particleHues: [270, 280, 190],
-    tagline: 'PURGE THE SQUIDS',
+    tagline: 'PURGEZ LES CALMARS',
   },
 };
 

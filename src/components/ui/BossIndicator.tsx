@@ -23,7 +23,7 @@ export function BossIndicator({ active }: BossIndicatorProps) {
               {'\u{1F480}'}
             </motion.span>
             <span className="font-display text-sm text-hd-red uppercase tracking-wider">
-              Boss Stratagem
+              Stratageme Boss
             </span>
             <span className="text-xs text-hd-red/70 font-heading">x2 Points</span>
           </div>

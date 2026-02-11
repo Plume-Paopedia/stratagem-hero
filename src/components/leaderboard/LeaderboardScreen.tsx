@@ -5,11 +5,11 @@ import { useLeaderboardStore } from '../../stores/leaderboardStore';
 import { Button } from '../ui/Button';
 
 const MODES: { id: GameMode; label: string }[] = [
-  { id: 'time-attack', label: 'Time Attack' },
-  { id: 'accuracy', label: 'Accuracy' },
-  { id: 'survival', label: 'Survival' },
+  { id: 'time-attack', label: 'Contre-la-Montre' },
+  { id: 'accuracy', label: 'Precision' },
+  { id: 'survival', label: 'Survie' },
   { id: 'quiz', label: 'Quiz' },
-  { id: 'daily-challenge', label: 'Daily' },
+  { id: 'daily-challenge', label: 'Quotidien' },
 ];
 
 interface LeaderboardScreenProps {
@@ -29,7 +29,7 @@ export function LeaderboardScreen({ onClose, initialMode }: LeaderboardScreenPro
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        High Scores
+        Meilleurs Scores
       </motion.h2>
 
       {/* Mode tabs */}
@@ -58,11 +58,11 @@ export function LeaderboardScreen({ onClose, initialMode }: LeaderboardScreenPro
       >
         {/* Header row */}
         <div className="grid grid-cols-[2.5rem_3rem_1fr_5rem_3.5rem] gap-2 px-3 py-2 text-xs font-heading uppercase tracking-wider text-hd-gray border-b border-hd-border">
-          <span>Rank</span>
-          <span>Name</span>
+          <span>Rang</span>
+          <span>Nom</span>
           <span />
           <span className="text-right">Score</span>
-          <span className="text-right">Strk</span>
+          <span className="text-right">Serie</span>
         </div>
 
         {/* Entries */}
@@ -101,7 +101,7 @@ export function LeaderboardScreen({ onClose, initialMode }: LeaderboardScreenPro
       </motion.div>
 
       <Button variant="secondary" size="md" onClick={onClose}>
-        Back
+        Retour
       </Button>
     </div>
   );

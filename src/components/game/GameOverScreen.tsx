@@ -48,8 +48,8 @@ export function GameOverScreen({
   const handleShare = useCallback(() => {
     const text = [
       'Stratagem Hero',
-      `Mode: ${modeLabel} | Score: ${score.toLocaleString()}`,
-      `Streak: ${bestStreak} | Accuracy: ${accuracy}%`,
+      `Mode : ${modeLabel} | Score : ${score.toLocaleString()}`,
+      `Serie : ${bestStreak} | Precision : ${accuracy}%`,
       '#StratagemHero #Helldivers2',
     ].join('\n');
     navigator.clipboard.writeText(text).then(() => {
@@ -71,7 +71,7 @@ export function GameOverScreen({
         animate={{ scale: 1 }}
         transition={{ delay: 0.2, type: 'spring' }}
       >
-        Mission Complete
+        Mission Accomplie
       </motion.h1>
 
       {isNewRecord && (
@@ -81,7 +81,7 @@ export function GameOverScreen({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.5, type: 'spring' }}
         >
-          NEW RECORD!
+          NOUVEAU RECORD !
         </motion.div>
       )}
 
@@ -102,14 +102,14 @@ export function GameOverScreen({
         animate="visible"
         variants={{ visible: { transition: { staggerChildren: 0.08, delayChildren: 0.4 } } }}
       >
-        <StatBlock label="Completed" value={`${successes}/${attempts.length}`} />
-        <StatBlock label="Accuracy" value={`${accuracy}%`} />
-        <StatBlock label="Best Streak" value={String(bestStreak)} />
-        <StatBlock label="Avg Time" value={avgTime > 0 ? `${(avgTime / 1000).toFixed(2)}s` : '-'} />
-        <StatBlock label="Total Time" value={`${(totalTimeMs / 1000).toFixed(1)}s`} />
+        <StatBlock label="Completes" value={`${successes}/${attempts.length}`} />
+        <StatBlock label="Precision" value={`${accuracy}%`} />
+        <StatBlock label="Meilleure Serie" value={String(bestStreak)} />
+        <StatBlock label="Temps Moyen" value={avgTime > 0 ? `${(avgTime / 1000).toFixed(2)}s` : '-'} />
+        <StatBlock label="Temps Total" value={`${(totalTimeMs / 1000).toFixed(1)}s`} />
         {fastest && (
           <StatBlock
-            label="Fastest"
+            label="Le Plus Rapide"
             value={`${(fastest.timeMs / 1000).toFixed(2)}s`}
             sub={stratagemMap.get(fastest.stratagemId)?.name}
           />
@@ -123,7 +123,7 @@ export function GameOverScreen({
 
       <div className="flex gap-3 mt-4">
         <Button variant="primary" size="lg" onClick={onRestart}>
-          Retry (R)
+          Rejouer (R)
         </Button>
         {onViewLeaderboard && (
           <Button variant="secondary" size="lg" onClick={onViewLeaderboard}>
@@ -131,16 +131,16 @@ export function GameOverScreen({
           </Button>
         )}
         <Button variant="secondary" size="lg" onClick={onMenu}>
-          Menu (Esc)
+          Menu (Echap)
         </Button>
       </div>
 
       <Button variant="ghost" size="sm" onClick={handleShare}>
-        {copied ? 'Copied!' : 'Share Results'}
+        {copied ? 'Copie !' : 'Partager'}
       </Button>
 
       <p className="text-xs text-hd-gray/50 font-heading uppercase tracking-wider mt-2">
-        Mode: {modeLabel}
+        Mode : {modeLabel}
       </p>
     </motion.div>
   );

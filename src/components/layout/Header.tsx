@@ -46,7 +46,7 @@ export function Header({ onStats, onSettings, onLeaderboard, onAchievements, onH
               ? 'text-hd-yellow bg-hd-yellow/10'
               : 'text-hd-gray hover:text-hd-white'
           }`}
-          title={musicEnabled ? 'Music ON' : 'Music OFF'}
+          title={musicEnabled ? 'Musique ON' : 'Musique OFF'}
         >
           {musicEnabled ? (
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -64,13 +64,13 @@ export function Header({ onStats, onSettings, onLeaderboard, onAchievements, onH
           Scores
         </Button>
         <Button variant="ghost" size="sm" onClick={onAchievements}>
-          Trophies
+          Succes
         </Button>
         <Button variant="ghost" size="sm" onClick={onStats}>
           Stats
         </Button>
         <Button variant="ghost" size="sm" onClick={onSettings}>
-          Settings
+          Parametres
         </Button>
       </div>
     </header>

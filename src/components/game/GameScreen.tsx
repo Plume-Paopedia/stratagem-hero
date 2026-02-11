@@ -110,12 +110,12 @@ export function GameScreen({ mode, queue, onExit, onViewLeaderboard }: GameScree
               )}
               {mode === 'quiz' && (
                 <div className="font-display text-lg text-hd-white">
-                  Lives: {'\u2764\uFE0F'.repeat(game.lives)}{'\u{1F5A4}'.repeat(3 - game.lives)}
+                  Vies : {'\u2764\uFE0F'.repeat(game.lives)}{'\u{1F5A4}'.repeat(3 - game.lives)}
                 </div>
               )}
               {mode === 'custom' && customConfig && customConfig.lives > 0 && (
                 <div className="font-display text-lg text-hd-white">
-                  Lives: {'\u2764\uFE0F'.repeat(game.lives)}{'\u{1F5A4}'.repeat(Math.max(0, customConfig.lives - game.lives))}
+                  Vies : {'\u2764\uFE0F'.repeat(game.lives)}{'\u{1F5A4}'.repeat(Math.max(0, customConfig.lives - game.lives))}
                 </div>
               )}
               {(mode === 'accuracy' || mode === 'speed-run' || mode === 'category-challenge') && (
@@ -125,12 +125,12 @@ export function GameScreen({ mode, queue, onExit, onViewLeaderboard }: GameScree
               )}
               {mode === 'speed-run' && game.penaltyMs > 0 && (
                 <div className="text-xs font-heading text-hd-red">
-                  +{(game.penaltyMs / 1000).toFixed(0)}s penalty
+                  +{(game.penaltyMs / 1000).toFixed(0)}s penalite
                 </div>
               )}
               {mode === 'endless' && (
                 <div className="text-sm font-heading text-hd-gray">
-                  Distance: {game.streak}
+                  Distance : {game.streak}
                 </div>
               )}
               {mode === 'custom' && customConfig?.timerType === 'countup' && (
@@ -138,7 +138,7 @@ export function GameScreen({ mode, queue, onExit, onViewLeaderboard }: GameScree
               )}
               {mode === 'custom' && game.penaltyMs > 0 && (
                 <div className="text-xs font-heading text-hd-red">
-                  +{(game.penaltyMs / 1000).toFixed(0)}s penalty
+                  +{(game.penaltyMs / 1000).toFixed(0)}s penalite
                 </div>
               )}
             </div>
@@ -159,7 +159,7 @@ export function GameScreen({ mode, queue, onExit, onViewLeaderboard }: GameScree
             <ParticleEffect trigger={effects.particleTrigger} multiplier={game.multiplier} />
 
             {mode === 'quiz' && (
-              <p className="text-sm text-hd-gray mt-2 text-center">Enter the combo from memory!</p>
+              <p className="text-sm text-hd-gray mt-2 text-center">Entrez le combo de memoire !</p>
             )}
           </div>
 
@@ -169,8 +169,8 @@ export function GameScreen({ mode, queue, onExit, onViewLeaderboard }: GameScree
           {/* Controls hint */}
           <div className="absolute bottom-4 left-4 right-4 flex justify-center">
             <div className="flex gap-4 text-xs text-hd-gray/50 font-heading uppercase tracking-wider">
-              <span>WASD / Arrows = Directions</span>
-              <span>Esc = Quit</span>
+              <span>ZQSD / Fleches = Directions</span>
+              <span>Echap = Quitter</span>
             </div>
           </div>
         </div>

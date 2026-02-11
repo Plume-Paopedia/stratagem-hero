@@ -25,22 +25,22 @@ export function StatsOverview({ onClose }: StatsOverviewProps) {
   return (
     <div className="flex flex-col gap-6 max-w-2xl mx-auto w-full p-6 overflow-y-auto">
       <h2 className="font-display text-2xl text-hd-yellow uppercase tracking-wider">
-        Statistics
+        Statistiques
       </h2>
 
       {/* Overview cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <StatCard label="Sessions" value={String(stats.totalSessions)} />
-        <StatCard label="Play Time" value={`${totalMinutes}m`} />
-        <StatCard label="Completed" value={String(stats.totalStratagemsCompleted)} />
-        <StatCard label="Total Errors" value={String(stats.totalErrors)} />
+        <StatCard label="Temps de Jeu" value={`${totalMinutes}m`} />
+        <StatCard label="Completes" value={String(stats.totalStratagemsCompleted)} />
+        <StatCard label="Erreurs Totales" value={String(stats.totalErrors)} />
       </div>
 
       {/* Best scores */}
       {Object.keys(stats.bestScores).length > 0 && (
         <div>
           <h3 className="font-heading text-sm text-hd-gray uppercase tracking-wider mb-3">
-            Best Scores
+            Meilleurs Scores
           </h3>
           <div className="grid grid-cols-2 gap-2">
             {Object.entries(stats.bestScores).map(([mode, score]) => (
@@ -58,26 +58,26 @@ export function StatsOverview({ onClose }: StatsOverviewProps) {
       {/* Notable stratagems */}
       <div>
         <h3 className="font-heading text-sm text-hd-gray uppercase tracking-wider mb-3">
-          Highlights
+          Faits Marquants
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {mostPracticed && (
             <HighlightCard
-              label="Most Practiced"
+              label="Plus Pratique"
               value={stratagemMap.get(mostPracticed.stratagemId)?.name ?? mostPracticed.stratagemId}
-              sub={`${mostPracticed.totalAttempts} attempts`}
+              sub={`${mostPracticed.totalAttempts} tentatives`}
             />
           )}
           {mostFailed && mostFailed.failures > 0 && (
             <HighlightCard
-              label="Most Failed"
+              label="Plus Echoue"
               value={stratagemMap.get(mostFailed.stratagemId)?.name ?? mostFailed.stratagemId}
-              sub={`${mostFailed.failures} failures`}
+              sub={`${mostFailed.failures} echecs`}
             />
           )}
           {fastest && (
             <HighlightCard
-              label="Fastest"
+              label="Le Plus Rapide"
               value={stratagemMap.get(fastest.stratagemId)?.name ?? fastest.stratagemId}
               sub={`${(fastest.bestTimeMs / 1000).toFixed(2)}s`}
             />
@@ -88,7 +88,7 @@ export function StatsOverview({ onClose }: StatsOverviewProps) {
       {/* Direction error heatmap */}
       <div>
         <h3 className="font-heading text-sm text-hd-gray uppercase tracking-wider mb-3">
-          Direction Errors
+          Erreurs de Direction
         </h3>
         <DirectionHeatmap errors={directionTotals} />
       </div>
@@ -97,7 +97,7 @@ export function StatsOverview({ onClose }: StatsOverviewProps) {
       {stats.sessions.length > 1 && (
         <div>
           <h3 className="font-heading text-sm text-hd-gray uppercase tracking-wider mb-3">
-            Accuracy Over Time
+            Precision au Fil du Temps
           </h3>
           <AccuracyChart sessions={stats.sessions.slice(-30)} />
         </div>
@@ -107,20 +107,20 @@ export function StatsOverview({ onClose }: StatsOverviewProps) {
       {stats.sessions.length > 0 && (
         <div>
           <h3 className="font-heading text-sm text-hd-gray uppercase tracking-wider mb-3">
-            Session History
+            Historique des Sessions
           </h3>
           <SessionHistory sessions={stats.sessions} />
         </div>
       )}
 
       <div className="flex gap-4">
-        <Button variant="ghost" onClick={onClose}>Back</Button>
+        <Button variant="ghost" onClick={onClose}>Retour</Button>
         <Button variant="danger" size="sm" onClick={() => {
-          if (confirm('Clear all statistics? This cannot be undone.')) {
+          if (confirm('Effacer toutes les statistiques ? Cette action est irreversible.')) {
             stats.clearAllStats();
           }
         }}>
-          Clear Stats
+          Effacer les Stats
         </Button>
       </div>
     </div>
@@ -161,28 +161,28 @@ function DirectionHeatmap({ errors }: { errors: Record<Direction, number> }) {
         <rect x="55" y="10" width="50" height="50" rx="4"
           fill={`rgba(255,51,51,${0.1 + getIntensity('up') * 0.8})`}
           stroke="#2a2a3a" strokeWidth="1" />
-        <text x="80" y="35" textAnchor="middle" fill="#e8e6e3" fontSize="10" fontFamily="Rajdhani">UP</text>
+        <text x="80" y="35" textAnchor="middle" fill="#e8e6e3" fontSize="10" fontFamily="Rajdhani">HAUT</text>
         <text x="80" y="50" textAnchor="middle" fill="#e8e6e3" fontSize="12" fontFamily="Orbitron">{errors.up}</text>
 
         {/* Left */}
         <rect x="0" y="65" width="50" height="50" rx="4"
           fill={`rgba(255,51,51,${0.1 + getIntensity('left') * 0.8})`}
           stroke="#2a2a3a" strokeWidth="1" />
-        <text x="25" y="90" textAnchor="middle" fill="#e8e6e3" fontSize="10" fontFamily="Rajdhani">LEFT</text>
+        <text x="25" y="90" textAnchor="middle" fill="#e8e6e3" fontSize="10" fontFamily="Rajdhani">GAUCHE</text>
         <text x="25" y="105" textAnchor="middle" fill="#e8e6e3" fontSize="12" fontFamily="Orbitron">{errors.left}</text>
 
         {/* Right */}
         <rect x="110" y="65" width="50" height="50" rx="4"
           fill={`rgba(255,51,51,${0.1 + getIntensity('right') * 0.8})`}
           stroke="#2a2a3a" strokeWidth="1" />
-        <text x="135" y="90" textAnchor="middle" fill="#e8e6e3" fontSize="10" fontFamily="Rajdhani">RIGHT</text>
+        <text x="135" y="90" textAnchor="middle" fill="#e8e6e3" fontSize="10" fontFamily="Rajdhani">DROITE</text>
         <text x="135" y="105" textAnchor="middle" fill="#e8e6e3" fontSize="12" fontFamily="Orbitron">{errors.right}</text>
 
         {/* Down */}
         <rect x="55" y="120" width="50" height="50" rx="4"
           fill={`rgba(255,51,51,${0.1 + getIntensity('down') * 0.8})`}
           stroke="#2a2a3a" strokeWidth="1" />
-        <text x="80" y="145" textAnchor="middle" fill="#e8e6e3" fontSize="10" fontFamily="Rajdhani">DOWN</text>
+        <text x="80" y="145" textAnchor="middle" fill="#e8e6e3" fontSize="10" fontFamily="Rajdhani">BAS</text>
         <text x="80" y="160" textAnchor="middle" fill="#e8e6e3" fontSize="12" fontFamily="Orbitron">{errors.down}</text>
 
         {/* Center */}

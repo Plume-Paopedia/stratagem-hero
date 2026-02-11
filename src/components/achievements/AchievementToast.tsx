@@ -50,7 +50,7 @@ export function AchievementToast() {
           <span className="text-3xl flex-shrink-0">{def.icon}</span>
           <div className="min-w-0">
             <div className="text-xs text-hd-yellow uppercase tracking-wider font-heading">
-              Achievement Unlocked
+              Succes Debloque
             </div>
             <div className="font-heading font-bold text-hd-white text-sm truncate">
               {def.name}

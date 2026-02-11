@@ -12,34 +12,34 @@ interface TutorialStep {
 
 const steps: TutorialStep[] = [
   {
-    title: 'Welcome to Stratagem Hero!',
-    description: 'Train your Helldivers 2 stratagem inputs and master every combo. For Super Earth!',
+    title: 'Bienvenue dans Stratagem Hero !',
+    description: 'Entrainez-vous aux combos de stratagemes Helldivers 2 et maitrisez chaque sequence. Pour Super Terre !',
     icon: '\u{1F985}',
   },
   {
-    title: 'This is a Stratagem Combo',
-    description: 'Each stratagem has a directional sequence. Match the arrows from left to right to complete it.',
+    title: 'Voici un Combo de Stratageme',
+    description: 'Chaque stratageme a une sequence directionnelle. Reproduisez les fleches de gauche a droite pour le completer.',
     icon: '\u2B06\uFE0F',
   },
   {
-    title: 'Input with Keyboard or Gamepad',
-    description: 'Use W/A/S/D or Arrow keys. Gamepads are also supported. Try pressing W or Up now!',
+    title: 'Saisie au Clavier ou a la Manette',
+    description: 'Utilisez Z/Q/S/D ou les fleches. Les manettes sont aussi compatibles. Essayez d\'appuyer sur Z ou Haut maintenant !',
     icon: '\u2328\uFE0F',
     interactive: 'press-w',
   },
   {
-    title: 'Complete Sequences',
-    description: 'Chain correct inputs to complete combos. Speed and accuracy earn you more points.',
+    title: 'Completez les Sequences',
+    description: 'Enchainez les bonnes saisies pour completer les combos. La vitesse et la precision vous rapportent plus de points.',
     icon: '\u26A1',
   },
   {
-    title: 'Build Streaks',
-    description: 'Consecutive correct combos build your streak multiplier: x2, x3, x4... The higher the multiplier, the more points you earn!',
+    title: 'Construisez vos Series',
+    description: 'Les combos reussis consecutivement augmentent votre multiplicateur : x2, x3, x4... Plus le multiplicateur est haut, plus vous gagnez de points !',
     icon: '\u{1F525}',
   },
   {
-    title: 'Choose Your Mode',
-    description: "11 game modes await: Time Attack, Survival, Speed Run, Boss Rush, and more. You're ready, soldier!",
+    title: 'Choisissez votre Mode',
+    description: "11 modes de jeu vous attendent : Contre-la-Montre, Survie, Speed Run, Boss Rush et plus encore. Vous etes pret, soldat !",
     icon: '\u{1F3AE}',
   },
 ];
@@ -122,7 +122,7 @@ export function TutorialOverlay({ onComplete }: TutorialOverlayProps) {
                   className="inline-flex items-center gap-2 px-4 py-2 bg-hd-dark border border-hd-yellow/50 rounded-lg"
                 >
                   <span className="font-display text-lg text-hd-yellow">W</span>
-                  <span className="text-xs text-hd-gray">or</span>
+                  <span className="text-xs text-hd-gray">ou</span>
                   <span className="font-display text-lg text-hd-yellow">{'\u2191'}</span>
                 </motion.div>
               ) : (
@@ -154,11 +154,11 @@ export function TutorialOverlay({ onComplete }: TutorialOverlayProps) {
         {/* Actions */}
         <div className="flex justify-center gap-3">
           <Button variant="ghost" size="sm" onClick={skip}>
-            Skip Tutorial
+            Passer le Tutoriel
           </Button>
           {canAdvance && (
             <Button variant="primary" size="sm" onClick={advance}>
-              {step === steps.length - 1 ? "Let's Go!" : 'Next'}
+              {step === steps.length - 1 ? "C'est Parti !" : 'Suivant'}
             </Button>
           )}
         </div>

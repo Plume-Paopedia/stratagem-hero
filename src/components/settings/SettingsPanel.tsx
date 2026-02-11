@@ -18,12 +18,12 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
 
   return (
     <div className="flex flex-col gap-6 max-w-md mx-auto w-full p-6">
-      <h2 className="font-display text-2xl text-hd-yellow uppercase tracking-wider">Settings</h2>
+      <h2 className="font-display text-2xl text-hd-yellow uppercase tracking-wider">Parametres</h2>
 
       {/* Volume */}
       <div className="flex flex-col gap-2">
         <label className="font-heading text-sm text-hd-gray uppercase tracking-wider">
-          Master Volume: {settings.masterVolume}%
+          Volume General : {settings.masterVolume}%
         </label>
         <input
           type="range"
@@ -37,14 +37,14 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
 
       {/* SFX Toggle */}
       <ToggleRow
-        label="Sound Effects"
+        label="Effets Sonores"
         value={settings.sfxEnabled}
         onChange={settings.toggleSfx}
       />
 
       {/* Music Toggle */}
       <ToggleRow
-        label="Music"
+        label="Musique"
         value={settings.musicEnabled}
         onChange={settings.toggleMusic}
       />
@@ -53,7 +53,7 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
       {settings.musicEnabled && (
         <div className="flex flex-col gap-2">
           <label className="font-heading text-sm text-hd-gray uppercase tracking-wider">
-            Music Volume: {settings.musicVolume}%
+            Volume Musique : {settings.musicVolume}%
           </label>
           <input
             type="range"
@@ -69,11 +69,11 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
       {/* Colorblind mode */}
       <div className="flex flex-col gap-2">
         <label className="font-heading text-sm text-hd-gray uppercase tracking-wider">
-          Colorblind Mode
+          Mode Daltonien
         </label>
         <div className="flex gap-2 flex-wrap">
           {([
-            { value: 'default', label: 'Default' },
+            { value: 'default', label: 'Defaut' },
             { value: 'protanopia', label: 'Protanopia' },
             { value: 'deuteranopia', label: 'Deuteranopia' },
             { value: 'tritanopia', label: 'Tritanopia' },
@@ -92,14 +92,14 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
 
       {/* High contrast */}
       <ToggleRow
-        label="High Contrast"
+        label="Haut Contraste"
         value={settings.highContrastMode}
         onChange={settings.toggleHighContrast}
       />
 
       {/* Reduced motion */}
       <ToggleRow
-        label="Reduced Motion"
+        label="Animations Reduites"
         value={settings.reducedMotion}
         onChange={settings.toggleReducedMotion}
       />
@@ -107,7 +107,7 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
       {/* Gamepad deadzone */}
       <div className="flex flex-col gap-2">
         <label className="font-heading text-sm text-hd-gray uppercase tracking-wider">
-          Gamepad Deadzone: {(settings.gamepadDeadzone * 100).toFixed(0)}%
+          Zone Morte Manette : {(settings.gamepadDeadzone * 100).toFixed(0)}%
         </label>
         <input
           type="range"
@@ -122,7 +122,7 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
       {/* Time Attack Duration */}
       <div className="flex flex-col gap-2">
         <label className="font-heading text-sm text-hd-gray uppercase tracking-wider">
-          Time Attack Duration
+          Duree Contre-la-Montre
         </label>
         <div className="flex gap-2">
           {[60, 90, 120].map((d) => (
@@ -141,7 +141,7 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
       {/* Accuracy Target */}
       <div className="flex flex-col gap-2">
         <label className="font-heading text-sm text-hd-gray uppercase tracking-wider">
-          Accuracy Challenge Target
+          Objectif Defi Precision
         </label>
         <div className="flex gap-2">
           {[20, 50, 100].map((n) => (
@@ -159,7 +159,7 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
 
       {/* Keybinds */}
       <Button variant="secondary" onClick={() => setShowKeybinds(true)}>
-        Configure Key Bindings
+        Configurer les Touches
       </Button>
 
       {/* Data Management */}
@@ -167,11 +167,11 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
 
       {/* Reset */}
       <Button variant="danger" size="sm" onClick={settings.resetToDefaults}>
-        Reset to Defaults
+        Reinitialiser
       </Button>
 
       <Button variant="ghost" onClick={onClose}>
-        Back
+        Retour
       </Button>
     </div>
   );

@@ -7,7 +7,7 @@ interface ScoreDisplayProps {
 
 export function ScoreDisplay({ score, className = '' }: ScoreDisplayProps) {
   return (
-    <div className={`font-display text-hd-white ${className}`} aria-live="polite" aria-label={`Score: ${score.toLocaleString()}`}>
+    <div className={`font-display text-hd-white ${className}`} aria-live="polite" aria-label={`Score : ${score.toLocaleString()}`}>
       <div className="text-xs text-hd-gray uppercase tracking-widest mb-1">Score</div>
       <AnimatePresence mode="popLayout">
         <motion.div

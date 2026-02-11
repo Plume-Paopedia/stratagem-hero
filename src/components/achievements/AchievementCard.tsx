@@ -31,7 +31,7 @@ export function AchievementCard({ def, progress }: AchievementCardProps) {
           {def.hidden && !unlocked ? '???' : def.name}
         </div>
         <div className="text-xs text-hd-gray mt-0.5">
-          {def.hidden && !unlocked ? 'Hidden achievement' : def.description}
+          {def.hidden && !unlocked ? 'Succes cache' : def.description}
         </div>
 
         {/* Progress bar */}

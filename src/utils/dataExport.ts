@@ -44,7 +44,7 @@ export function importData(json: string): { success: boolean; error?: string } {
   try {
     const data = JSON.parse(json) as ExportData;
     if (!data.version || data.version !== 1) {
-      return { success: false, error: 'Invalid backup file version' };
+      return { success: false, error: 'Version du fichier de sauvegarde invalide' };
     }
 
     if (data.stats) localStorage.setItem(STATS_KEY, JSON.stringify(data.stats));
@@ -55,7 +55,7 @@ export function importData(json: string): { success: boolean; error?: string } {
 
     return { success: true };
   } catch {
-    return { success: false, error: 'Invalid JSON file' };
+    return { success: false, error: 'Fichier JSON invalide' };
   }
 }
 
