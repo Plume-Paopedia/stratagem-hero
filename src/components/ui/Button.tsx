@@ -45,6 +45,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         whileHover={disabled ? undefined : { scale: 1.02 }}
         whileTap={disabled ? undefined : { scale: 0.97 }}
         disabled={disabled}
+        aria-disabled={disabled || undefined}
         className={`
           inline-flex items-center justify-center gap-2
           font-heading font-semibold uppercase tracking-wider

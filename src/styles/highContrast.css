@@ -1,0 +1,22 @@
+/* High Contrast mode */
+[data-high-contrast="true"] {
+  --hd-bg: #000000;
+  --hd-panel: #111111;
+  --hd-border: #ffffff;
+}
+
+[data-high-contrast="true"] .text-hd-gray { color: #d0d0d0; }
+[data-high-contrast="true"] .text-hd-gray\/40 { color: rgba(208, 208, 208, 0.7); }
+[data-high-contrast="true"] .text-hd-gray\/50 { color: rgba(208, 208, 208, 0.8); }
+[data-high-contrast="true"] .text-hd-white { color: #ffffff; }
+[data-high-contrast="true"] .text-hd-yellow { color: #ffdd00; }
+[data-high-contrast="true"] .text-hd-red { color: #ff4444; }
+[data-high-contrast="true"] .border-hd-border { border-color: #666666; }
+[data-high-contrast="true"] .bg-hd-dark { background-color: #000000; }
+[data-high-contrast="true"] .bg-hd-panel { background-color: #111111; }
+
+/* Ensure focus indicators are highly visible */
+[data-high-contrast="true"] *:focus-visible {
+  outline: 3px solid #ffdd00 !important;
+  outline-offset: 2px;
+}

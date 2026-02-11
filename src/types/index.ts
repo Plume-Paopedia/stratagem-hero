@@ -123,7 +123,8 @@ export interface UserSettings {
   musicVolume: number;
   keyBindings: KeyBindings;
   gamepadDeadzone: number;
-  colorblindMode: boolean;
+  colorblindMode: 'default' | 'protanopia' | 'deuteranopia' | 'tritanopia';
+  highContrastMode: boolean;
   reducedMotion: boolean;
   timeAttackDuration: number;
   accuracyTargetCount: number;

@@ -66,10 +66,34 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
       )}
 
       {/* Colorblind mode */}
+      <div className="flex flex-col gap-2">
+        <label className="font-heading text-sm text-hd-gray uppercase tracking-wider">
+          Colorblind Mode
+        </label>
+        <div className="flex gap-2 flex-wrap">
+          {([
+            { value: 'default', label: 'Default' },
+            { value: 'protanopia', label: 'Protanopia' },
+            { value: 'deuteranopia', label: 'Deuteranopia' },
+            { value: 'tritanopia', label: 'Tritanopia' },
+          ] as const).map((opt) => (
+            <Button
+              key={opt.value}
+              variant={settings.colorblindMode === opt.value ? 'primary' : 'secondary'}
+              size="sm"
+              onClick={() => settings.setColorblindMode(opt.value)}
+            >
+              {opt.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {/* High contrast */}
       <ToggleRow
-        label="Colorblind Mode"
-        value={settings.colorblindMode}
-        onChange={settings.toggleColorblindMode}
+        label="High Contrast"
+        value={settings.highContrastMode}
+        onChange={settings.toggleHighContrast}
       />
 
       {/* Reduced motion */}

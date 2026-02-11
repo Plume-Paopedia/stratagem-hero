@@ -25,6 +25,7 @@ import { AchievementToast } from './components/achievements/AchievementToast';
 import { InstallPrompt } from './components/pwa/InstallPrompt';
 import { OfflineBanner } from './components/pwa/OfflineBanner';
 import { TutorialOverlay } from './components/tutorial/TutorialOverlay';
+import { SkipToContent } from './components/a11y/SkipToContent';
 
 // Lazy-loaded screens
 const StratagemGrid = lazy(() => import('./components/stratagem/StratagemGrid').then(m => ({ default: m.StratagemGrid })));
@@ -201,9 +202,17 @@ export default function App() {
   }, []);
 
   const reducedMotion = useSettingsStore((s) => s.reducedMotion);
+  const colorblindMode = useSettingsStore((s) => s.colorblindMode);
+  const highContrastMode = useSettingsStore((s) => s.highContrastMode);
 
   return (
-    <div className="h-full flex flex-col relative z-10" data-faction={activeFaction ?? undefined}>
+    <div
+      className="h-full flex flex-col relative z-10"
+      data-faction={activeFaction ?? undefined}
+      data-colorblind={colorblindMode !== 'default' ? colorblindMode : undefined}
+      data-high-contrast={highContrastMode ? 'true' : undefined}
+    >
+      <SkipToContent />
       {/* Global ambient effects */}
       {!reducedMotion && <AmbientParticles />}
       <FactionBackground />
@@ -218,7 +227,7 @@ export default function App() {
         showBack={screen !== 'menu'}
       />
 
-      <main className="flex-1 overflow-hidden">
+      <main id="main-content" className="flex-1 overflow-hidden">
         <AnimatePresence mode="wait">
           {screen === 'menu' && (
             <PageTransition key="menu">

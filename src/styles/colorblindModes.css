@@ -1,0 +1,44 @@
+/* Protanopia - Red-weak */
+[data-colorblind="protanopia"] {
+  --hd-red: #c4a000;
+  --hd-yellow: #729fcf;
+  --hd-green: #73d216;
+}
+
+[data-colorblind="protanopia"] .text-hd-red { color: #c4a000; }
+[data-colorblind="protanopia"] .text-hd-yellow { color: #729fcf; }
+[data-colorblind="protanopia"] .text-green-400 { color: #73d216; }
+[data-colorblind="protanopia"] .border-hd-red { border-color: #c4a000; }
+[data-colorblind="protanopia"] .border-hd-yellow { border-color: #729fcf; }
+[data-colorblind="protanopia"] .bg-hd-yellow { background-color: #729fcf; }
+[data-colorblind="protanopia"] .bg-hd-red\/20 { background-color: rgba(196, 160, 0, 0.2); }
+
+/* Deuteranopia - Green-weak */
+[data-colorblind="deuteranopia"] {
+  --hd-red: #e77600;
+  --hd-yellow: #5c9aff;
+  --hd-green: #edd400;
+}
+
+[data-colorblind="deuteranopia"] .text-hd-red { color: #e77600; }
+[data-colorblind="deuteranopia"] .text-hd-yellow { color: #5c9aff; }
+[data-colorblind="deuteranopia"] .text-green-400 { color: #edd400; }
+[data-colorblind="deuteranopia"] .border-hd-red { border-color: #e77600; }
+[data-colorblind="deuteranopia"] .border-hd-yellow { border-color: #5c9aff; }
+[data-colorblind="deuteranopia"] .bg-hd-yellow { background-color: #5c9aff; }
+[data-colorblind="deuteranopia"] .bg-hd-red\/20 { background-color: rgba(231, 118, 0, 0.2); }
+
+/* Tritanopia - Blue-weak */
+[data-colorblind="tritanopia"] {
+  --hd-red: #ff5555;
+  --hd-yellow: #ff8c00;
+  --hd-green: #00e5ff;
+}
+
+[data-colorblind="tritanopia"] .text-hd-red { color: #ff5555; }
+[data-colorblind="tritanopia"] .text-hd-yellow { color: #ff8c00; }
+[data-colorblind="tritanopia"] .text-green-400 { color: #00e5ff; }
+[data-colorblind="tritanopia"] .border-hd-red { border-color: #ff5555; }
+[data-colorblind="tritanopia"] .border-hd-yellow { border-color: #ff8c00; }
+[data-colorblind="tritanopia"] .bg-hd-yellow { background-color: #ff8c00; }
+[data-colorblind="tritanopia"] .bg-hd-red\/20 { background-color: rgba(255, 85, 85, 0.2); }

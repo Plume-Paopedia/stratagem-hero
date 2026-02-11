@@ -23,7 +23,8 @@ const defaultSettings: UserSettings = {
   musicVolume: 40,
   keyBindings: defaultKeyBindings,
   gamepadDeadzone: 0.3,
-  colorblindMode: false,
+  colorblindMode: 'default',
+  highContrastMode: false,
   reducedMotion: false,
   timeAttackDuration: 60,
   accuracyTargetCount: 20,
@@ -38,7 +39,8 @@ interface SettingsState extends UserSettings {
   setMusicVol: (volume: number) => void;
   setKeyBinding: (action: keyof KeyBindings, keys: string[]) => void;
   setGamepadDeadzone: (deadzone: number) => void;
-  toggleColorblindMode: () => void;
+  setColorblindMode: (mode: UserSettings['colorblindMode']) => void;
+  toggleHighContrast: () => void;
   toggleReducedMotion: () => void;
   setTimeAttackDuration: (duration: number) => void;
   setAccuracyTargetCount: (count: number) => void;
@@ -57,6 +59,7 @@ function persistAll(state: UserSettings) {
     reducedMotion: state.reducedMotion,
     timeAttackDuration: state.timeAttackDuration,
     accuracyTargetCount: state.accuracyTargetCount,
+    highContrastMode: state.highContrastMode,
     hasCompletedTutorial: state.hasCompletedTutorial,
   });
 }
@@ -106,9 +109,11 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
 
     setGamepadDeadzone: (deadzone) => persist({ gamepadDeadzone: deadzone }),
 
-    toggleColorblindMode: () => {
-      const next = !get().colorblindMode;
-      persist({ colorblindMode: next });
+    setColorblindMode: (mode) => persist({ colorblindMode: mode }),
+
+    toggleHighContrast: () => {
+      const next = !get().highContrastMode;
+      persist({ highContrastMode: next });
     },
 
     toggleReducedMotion: () => {

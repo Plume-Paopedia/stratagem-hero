@@ -16,6 +16,8 @@ export function Timer({ timeMs, warningMs = 5000, className = '' }: TimerProps) 
 
   return (
     <motion.div
+      aria-live="polite"
+      aria-label={`Time: ${display}`}
       className={`font-display text-2xl tabular-nums ${
         isWarning ? 'text-hd-red' : 'text-hd-white'
       } ${className}`}
