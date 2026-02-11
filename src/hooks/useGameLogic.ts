@@ -10,6 +10,7 @@ import { useLeaderboardStore } from '../stores/leaderboardStore';
 import { getStreakMultiplier, calculateScore, calculateAccuracy } from '../utils/scoring';
 import { checkSessionAchievements, checkLiveAchievement } from '../utils/achievementChecker';
 import { useStatsStore as getStatsState } from '../stores/statsStore';
+import { useCustomModeStore } from '../stores/customModeStore';
 import type { GameEffects } from './useGameEffects';
 
 interface UseGameLogicOptions {
@@ -28,6 +29,7 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
   const addLeaderboardEntry = useLeaderboardStore((s) => s.addEntry);
   const recordStats = useStatsStore((s) => s.recordSession);
   const bestScores = useStatsStore((s) => s.bestScores);
+  const customConfig = useCustomModeStore((s) => s.activeConfig);
 
   // Game state
   const [state, setState] = useState<'countdown' | 'playing' | 'game-over'>('countdown');
@@ -39,7 +41,7 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
   const [multiplier, setMultiplier] = useState(1);
   const [attempts, setAttempts] = useState<StratagemAttempt[]>([]);
   const [error, setError] = useState(false);
-  const [lives, setLives] = useState(3);
+  const [lives, setLives] = useState(mode === 'custom' && customConfig?.lives ? customConfig.lives : 3);
   const [survivalTimeLimit, setSurvivalTimeLimit] = useState(8000);
   const [showInitialEntry, setShowInitialEntry] = useState(false);
   const [leaderboardRank, setLeaderboardRank] = useState<number | null>(null);
@@ -56,6 +58,11 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
 
   // Timer setup based on mode
   const timerInitialMs = useMemo(() => {
+    if (mode === 'custom' && customConfig) {
+      if (customConfig.timerType === 'countdown') return customConfig.timerDuration * 1000;
+      if (customConfig.timerType === 'survival') return customConfig.timerDuration * 1000;
+      return 0; // 'none' or 'countup'
+    }
     switch (mode) {
       case 'time-attack': return timeAttackDuration * 1000;
       case 'survival': return survivalTimeLimit;
@@ -63,16 +70,18 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
       case 'boss-rush': return survivalTimeLimit;
       default: return 0;
     }
-  }, [mode, timeAttackDuration, survivalTimeLimit]);
+  }, [mode, timeAttackDuration, survivalTimeLimit, customConfig]);
 
-  const useCountdownTimer = mode === 'time-attack' || mode === 'survival' || mode === 'endless' || mode === 'boss-rush';
+  const customUsesCountdown = mode === 'custom' && customConfig != null
+    && (customConfig.timerType === 'countdown' || customConfig.timerType === 'survival');
+  const useCountdownTimer = mode === 'time-attack' || mode === 'survival' || mode === 'endless' || mode === 'boss-rush' || customUsesCountdown;
 
   const { timeMs, reset: resetTimer } = useTimer({
     initialMs: timerInitialMs,
     countDown: useCountdownTimer,
     active: isPlaying && useCountdownTimer,
     onComplete: () => {
-      if (mode === 'survival' || mode === 'time-attack' || mode === 'endless' || mode === 'boss-rush') {
+      if (mode === 'survival' || mode === 'time-attack' || mode === 'endless' || mode === 'boss-rush' || customUsesCountdown) {
         endGame();
       }
     },
@@ -108,9 +117,10 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
       const newMult = getStreakMultiplier(newStreak);
       const scoreBreak = calculateScore(timeMs, strat.sequence.length, newMult);
 
-      // Boss Rush: x2 score during boss combos
+      // Score multipliers: boss x2, custom mode scoreMultiplier
       const bossMultiplier = isBoss ? 2 : 1;
-      setScore((s) => s + scoreBreak.total * bossMultiplier);
+      const customScoreMult = mode === 'custom' && customConfig ? customConfig.scoreMultiplier : 1;
+      setScore((s) => s + Math.round(scoreBreak.total * bossMultiplier * customScoreMult));
       setStreak(newStreak);
       setBestStreak((b) => Math.max(b, newStreak));
       setMultiplier(newMult);
@@ -157,8 +167,10 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
       // Advance to next
       const nextIndex = currentIndex + 1;
       const loopingModes: GameMode[] = ['survival', 'time-attack', 'endless', 'boss-rush'];
+      const customLoops = mode === 'custom' && customConfig
+        && (customConfig.timerType === 'countdown' || customConfig.timerType === 'survival');
       if (nextIndex >= queue.length) {
-        if (loopingModes.includes(mode)) {
+        if (loopingModes.includes(mode) || customLoops) {
           setCurrentIndex(0);
         } else {
           endGame();
@@ -190,8 +202,13 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
       if (mode === 'endless') {
         resetTimer(10000);
       }
+
+      // Custom survival: reset timer on success
+      if (mode === 'custom' && customConfig?.timerType === 'survival') {
+        resetTimer(customConfig.timerDuration * 1000);
+      }
     },
-    [streak, multiplier, currentIndex, queue.length, mode, isBoss, audio, endGame, resetTimer, survivalTimeLimit, effects],
+    [streak, multiplier, currentIndex, queue.length, mode, isBoss, audio, endGame, resetTimer, survivalTimeLimit, effects, customConfig],
   );
 
   const handleError = useCallback(
@@ -227,9 +244,32 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
         resetTimer(Math.max(0, timeMs - 3000));
       }
 
+      // Custom mode error behavior
+      if (mode === 'custom' && customConfig) {
+        switch (customConfig.errorBehavior) {
+          case 'end-game':
+            endGame(); return;
+          case 'lose-life': {
+            if (customConfig.lives > 0) {
+              const newLives = lives - 1;
+              setLives(newLives);
+              if (newLives <= 0) { endGame(); return; }
+            }
+            break;
+          }
+          case 'time-penalty':
+            if (customUsesCountdown) {
+              resetTimer(Math.max(0, timeMs - customConfig.timePenaltyMs));
+            }
+            setPenaltyMs((p) => p + customConfig.timePenaltyMs);
+            break;
+          // 'reset-streak' is already handled above (streak always resets on error)
+        }
+      }
+
       setTimeout(() => setError(false), 300);
     },
-    [streak, mode, lives, audio, endGame, effects, resetTimer, timeMs],
+    [streak, mode, lives, audio, endGame, effects, resetTimer, timeMs, customConfig, customUsesCountdown],
   );
 
   useStratagemInput({
@@ -289,7 +329,7 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
     setAttempts([]);
     setShowInitialEntry(false);
     setLeaderboardRank(null);
-    setLives(3);
+    setLives(mode === 'custom' && customConfig?.lives ? customConfig.lives : 3);
     setPenaltyMs(0);
     setIsBoss(false);
     setSurvivalTimeLimit(8000);

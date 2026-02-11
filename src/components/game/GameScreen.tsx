@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import type { GameMode, Stratagem } from '../../types';
+import { useCustomModeStore } from '../../stores/customModeStore';
 import { useGameEffects } from '../../hooks/useGameEffects';
 import { useGameLogic } from '../../hooks/useGameLogic';
 import { useGameKeyboard } from '../../hooks/useGameKeyboard';
@@ -30,6 +31,7 @@ interface GameScreenProps {
 export function GameScreen({ mode, queue, onExit, onViewLeaderboard }: GameScreenProps) {
   const effects = useGameEffects();
   const game = useGameLogic({ mode, queue, effects });
+  const customConfig = useCustomModeStore((s) => s.activeConfig);
 
   // Continuous shake at x4 multiplier
   useEffect(() => {
@@ -111,6 +113,11 @@ export function GameScreen({ mode, queue, onExit, onViewLeaderboard }: GameScree
                   Lives: {'\u2764\uFE0F'.repeat(game.lives)}{'\u{1F5A4}'.repeat(3 - game.lives)}
                 </div>
               )}
+              {mode === 'custom' && customConfig && customConfig.lives > 0 && (
+                <div className="font-display text-lg text-hd-white">
+                  Lives: {'\u2764\uFE0F'.repeat(game.lives)}{'\u{1F5A4}'.repeat(Math.max(0, customConfig.lives - game.lives))}
+                </div>
+              )}
               {(mode === 'accuracy' || mode === 'speed-run' || mode === 'category-challenge') && (
                 <div className="text-sm font-heading text-hd-gray">
                   {game.currentIndex + 1} / {queue.length}
@@ -124,6 +131,14 @@ export function GameScreen({ mode, queue, onExit, onViewLeaderboard }: GameScree
               {mode === 'endless' && (
                 <div className="text-sm font-heading text-hd-gray">
                   Distance: {game.streak}
+                </div>
+              )}
+              {mode === 'custom' && customConfig?.timerType === 'countup' && (
+                <Timer timeMs={game.elapsedMs + game.penaltyMs} warningMs={0} />
+              )}
+              {mode === 'custom' && game.penaltyMs > 0 && (
+                <div className="text-xs font-heading text-hd-red">
+                  +{(game.penaltyMs / 1000).toFixed(0)}s penalty
                 </div>
               )}
             </div>

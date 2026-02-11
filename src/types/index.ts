@@ -40,7 +40,8 @@ export type GameMode =
   | 'speed-run'
   | 'endless'
   | 'category-challenge'
-  | 'boss-rush';
+  | 'boss-rush'
+  | 'custom';
 
 /** Game states */
 export type GameState = 'idle' | 'countdown' | 'playing' | 'paused' | 'game-over';
@@ -156,4 +157,5 @@ export type AppScreen =
   | 'stats'
   | 'settings'
   | 'leaderboard'
-  | 'achievements';
+  | 'achievements'
+  | 'custom-builder';

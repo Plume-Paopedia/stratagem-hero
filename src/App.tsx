@@ -1,8 +1,12 @@
-import { useState, useCallback, lazy, Suspense } from 'react';
+import { useState, useCallback, useEffect, lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { GameMode, Stratagem, StratagemCategory, AppScreen } from './types';
 import { stratagems, getByCategory } from './data/stratagems';
+import type { CustomModeConfig } from './types/customMode';
 import { CategorySelect } from './components/game/CategorySelect';
+import { CustomModeBuilder } from './components/customMode/CustomModeBuilder';
+import { useCustomModeStore } from './stores/customModeStore';
+import { getConfigFromUrl } from './utils/customModeEncoding';
 import { getDailySeed, seededRandom } from './utils/scoring';
 import { useSettingsStore } from './stores/settingsStore';
 import { Header } from './components/layout/Header';
@@ -46,6 +50,7 @@ const gameModes: { id: GameMode; name: string; icon: string; desc: string }[] = 
   { id: 'endless', name: 'Endless', icon: '\u267E\uFE0F', desc: 'Timer resets on success. Errors subtract 3s. How far can you go?' },
   { id: 'category-challenge', name: 'Category', icon: '\u{1F4C2}', desc: 'Master one category. Pick your specialty and race the clock.' },
   { id: 'boss-rush', name: 'Boss Rush', icon: '\u{1F480}', desc: 'Every 10 combos a boss appears. Harder combos, double points.' },
+  { id: 'custom', name: 'Custom', icon: '\u{1F6E0}\uFE0F', desc: 'Build your own rules. Save presets. Share via URL.' },
 ];
 
 export default function App() {
@@ -97,6 +102,11 @@ export default function App() {
       return;
     }
 
+    if (mode === 'custom') {
+      setScreen('custom-builder');
+      return;
+    }
+
     setScreen('stratagem-select');
   }, [audio, settings.accuracyTargetCount]);
 
@@ -106,6 +116,45 @@ export default function App() {
     setGameQueue(shuffleArray(catStratagems));
     setScreen('game');
   }, [audio]);
+
+  const setActiveConfig = useCustomModeStore((s) => s.setActiveConfig);
+
+  const handleCustomStart = useCallback((config: CustomModeConfig) => {
+    audio.menuClick();
+    setActiveConfig(config);
+    setSelectedMode('custom');
+
+    // Build queue based on config
+    let pool = [...stratagems];
+    if (config.queueSource === 'category' && config.category) {
+      pool = getByCategory(config.category);
+    } else if (config.queueSource === 'tier' && config.tier) {
+      pool = stratagems.filter((s) => s.tier === config.tier);
+    }
+
+    let queue = config.shuffle ? shuffleArray(pool) : pool;
+    if (config.queueLength > 0) {
+      queue = queue.slice(0, config.queueLength);
+    }
+
+    // For looping modes (survival/countdown), repeat the queue
+    if (config.timerType === 'survival' || config.timerType === 'countdown') {
+      queue = queue.concat(shuffleArray(pool)).concat(shuffleArray(pool));
+    }
+
+    setGameQueue(queue);
+    setScreen('game');
+  }, [audio, setActiveConfig]);
+
+  // Detect #custom=... URL hash on mount
+  useEffect(() => {
+    const config = getConfigFromUrl();
+    if (config) {
+      window.history.replaceState(null, '', window.location.pathname);
+      handleCustomStart(config);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleToggleStratagem = useCallback((id: string) => {
     setSelectedStratagems((prev) => {
@@ -251,6 +300,14 @@ export default function App() {
                 <Suspense fallback={<LoadingSkeleton lines={4} />}>
                   <LeaderboardScreen onClose={goHome} initialMode={leaderboardMode} />
                 </Suspense>
+              </ScreenErrorBoundary>
+            </PageTransition>
+          )}
+
+          {screen === 'custom-builder' && (
+            <PageTransition key="custom-builder">
+              <ScreenErrorBoundary onReset={goHome}>
+                <CustomModeBuilder onStart={handleCustomStart} onClose={goHome} />
               </ScreenErrorBoundary>
             </PageTransition>
           )}
