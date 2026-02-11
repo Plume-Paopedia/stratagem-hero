@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { Button } from '../ui/Button';
 import { KeybindEditor } from './KeybindEditor';
+import { DataManagement } from './DataManagement';
 
 interface SettingsPanelProps {
   onClose: () => void;
@@ -160,6 +161,9 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
       <Button variant="secondary" onClick={() => setShowKeybinds(true)}>
         Configure Key Bindings
       </Button>
+
+      {/* Data Management */}
+      <DataManagement />
 
       {/* Reset */}
       <Button variant="danger" size="sm" onClick={settings.resetToDefaults}>

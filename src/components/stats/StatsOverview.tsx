@@ -2,6 +2,7 @@ import { useStatsStore } from '../../stores/statsStore';
 import { Button } from '../ui/Button';
 import { stratagemMap } from '../../data/stratagems';
 import type { Direction } from '../../types';
+import { SessionHistory } from './SessionHistory';
 
 interface StatsOverviewProps {
   onClose: () => void;
@@ -99,6 +100,16 @@ export function StatsOverview({ onClose }: StatsOverviewProps) {
             Accuracy Over Time
           </h3>
           <AccuracyChart sessions={stats.sessions.slice(-30)} />
+        </div>
+      )}
+
+      {/* Session History */}
+      {stats.sessions.length > 0 && (
+        <div>
+          <h3 className="font-heading text-sm text-hd-gray uppercase tracking-wider mb-3">
+            Session History
+          </h3>
+          <SessionHistory sessions={stats.sessions} />
         </div>
       )}
 
