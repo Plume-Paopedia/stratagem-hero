@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import type { Stratagem } from '../../types';
+import { StratagemIcon } from '../icons/StratagemIcon';
 
 interface ComboQueueProps {
   queue: Stratagem[];
@@ -23,7 +24,7 @@ export function ComboQueue({ queue, currentIndex, maxVisible = 5 }: ComboQueuePr
             animate={{ opacity: 1 - i * 0.2, x: 0 }}
             className="flex items-center gap-1.5 px-2 py-1 bg-hd-dark rounded border border-hd-border"
           >
-            <span className="text-sm">{strat.icon}</span>
+            <StratagemIcon iconId={strat.iconId} size={18} fallbackEmoji={strat.icon} />
             <span className="text-xs font-heading text-hd-gray truncate max-w-[80px]">
               {strat.name}
             </span>

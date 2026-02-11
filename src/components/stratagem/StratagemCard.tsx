@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import type { Stratagem } from '../../types';
 import { DirectionArrow } from './DirectionArrow';
+import { StratagemIcon } from '../icons/StratagemIcon';
 
 interface StratagemCardProps {
   stratagem: Stratagem;
@@ -36,7 +37,7 @@ export function StratagemCard({
           }
         `}
       >
-        <span className="text-lg">{stratagem.icon}</span>
+        <StratagemIcon iconId={stratagem.iconId} size={24} fallbackEmoji={stratagem.icon} />
         <span className="font-heading text-sm truncate">{stratagem.name}</span>
       </motion.button>
     );
@@ -56,7 +57,7 @@ export function StratagemCard({
         }
       `}
     >
-      <span className="text-3xl">{stratagem.icon}</span>
+      <StratagemIcon iconId={stratagem.iconId} size={40} fallbackEmoji={stratagem.icon} glow={selected} />
       <span className="font-heading font-semibold text-sm uppercase tracking-wide text-center leading-tight">
         {stratagem.name}
       </span>

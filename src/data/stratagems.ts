@@ -16,7 +16,7 @@ function s(
   description: string,
   icon: string,
 ): Stratagem {
-  return { id, name, category, sequence, cooldown, uses, description, icon, tier: tier(sequence) };
+  return { id, name, category, sequence, cooldown, uses, description, icon, iconId: id, tier: tier(sequence) };
 }
 
 export const stratagems: Stratagem[] = [

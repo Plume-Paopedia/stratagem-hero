@@ -25,6 +25,7 @@ export interface Stratagem {
   uses: number | 'infinite';
   description: string;
   icon: string;
+  iconId: string;
   tier: StratagemTier;
 }
 

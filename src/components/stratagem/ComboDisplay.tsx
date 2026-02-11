@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Stratagem } from '../../types';
 import { DirectionArrow } from './DirectionArrow';
+import { StratagemIcon } from '../icons/StratagemIcon';
 
 interface ComboDisplayProps {
   stratagem: Stratagem;
@@ -32,7 +33,7 @@ export function ComboDisplay({
             exit={{ opacity: 0, y: 10 }}
             className="text-center"
           >
-            <span className="text-3xl mb-1 block">{stratagem.icon}</span>
+            <span className="mb-1 block"><StratagemIcon iconId={stratagem.iconId} size={40} fallbackEmoji={stratagem.icon} glow /></span>
             <h2 className="font-display text-xl text-hd-yellow tracking-wider uppercase">
               {stratagem.name}
             </h2>
