@@ -43,6 +43,8 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
   const [survivalTimeLimit, setSurvivalTimeLimit] = useState(8000);
   const [showInitialEntry, setShowInitialEntry] = useState(false);
   const [leaderboardRank, setLeaderboardRank] = useState<number | null>(null);
+  const [penaltyMs, setPenaltyMs] = useState(0);
+  const [isBoss, setIsBoss] = useState(false);
 
   const attemptStartRef = useRef(performance.now());
   const attemptErrorsRef = useRef(0);
@@ -57,18 +59,20 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
     switch (mode) {
       case 'time-attack': return timeAttackDuration * 1000;
       case 'survival': return survivalTimeLimit;
+      case 'endless': return 10000;
+      case 'boss-rush': return survivalTimeLimit;
       default: return 0;
     }
   }, [mode, timeAttackDuration, survivalTimeLimit]);
 
-  const useCountdownTimer = mode === 'time-attack' || mode === 'survival';
+  const useCountdownTimer = mode === 'time-attack' || mode === 'survival' || mode === 'endless' || mode === 'boss-rush';
 
   const { timeMs, reset: resetTimer } = useTimer({
     initialMs: timerInitialMs,
     countDown: useCountdownTimer,
     active: isPlaying && useCountdownTimer,
     onComplete: () => {
-      if (mode === 'survival' || mode === 'time-attack') {
+      if (mode === 'survival' || mode === 'time-attack' || mode === 'endless' || mode === 'boss-rush') {
         endGame();
       }
     },
@@ -104,7 +108,9 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
       const newMult = getStreakMultiplier(newStreak);
       const scoreBreak = calculateScore(timeMs, strat.sequence.length, newMult);
 
-      setScore((s) => s + scoreBreak.total);
+      // Boss Rush: x2 score during boss combos
+      const bossMultiplier = isBoss ? 2 : 1;
+      setScore((s) => s + scoreBreak.total * bossMultiplier);
       setStreak(newStreak);
       setBestStreak((b) => Math.max(b, newStreak));
       setMultiplier(newMult);
@@ -150,14 +156,26 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
 
       // Advance to next
       const nextIndex = currentIndex + 1;
+      const loopingModes: GameMode[] = ['survival', 'time-attack', 'endless', 'boss-rush'];
       if (nextIndex >= queue.length) {
-        if (mode !== 'survival' && mode !== 'time-attack') {
-          endGame();
-        } else {
+        if (loopingModes.includes(mode)) {
           setCurrentIndex(0);
+        } else {
+          endGame();
         }
       } else {
         setCurrentIndex(nextIndex);
+      }
+
+      // Boss Rush: detect boss every 10 combos, speed up every 5
+      if (mode === 'boss-rush') {
+        setIsBoss(newStreak % 10 === 9); // next combo will be boss
+        if (newStreak % 5 === 0) {
+          setSurvivalTimeLimit((t) => Math.max(3000, t - 200));
+          resetTimer(Math.max(3000, survivalTimeLimit - 200));
+        } else {
+          resetTimer(isBoss ? Math.max(3000, survivalTimeLimit - 2000) : survivalTimeLimit);
+        }
       }
 
       // Survival: speed up every 5
@@ -167,8 +185,13 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
       } else if (mode === 'survival') {
         resetTimer(survivalTimeLimit);
       }
+
+      // Endless: reset timer to 10s on success
+      if (mode === 'endless') {
+        resetTimer(10000);
+      }
     },
-    [streak, multiplier, currentIndex, queue.length, mode, audio, endGame, resetTimer, survivalTimeLimit, effects],
+    [streak, multiplier, currentIndex, queue.length, mode, isBoss, audio, endGame, resetTimer, survivalTimeLimit, effects],
   );
 
   const handleError = useCallback(
@@ -192,11 +215,21 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
         if (newLives <= 0) { endGame(); return; }
       }
 
-      if (mode === 'survival') { endGame(); }
+      if (mode === 'survival' || mode === 'boss-rush') { endGame(); return; }
+
+      // Speed Run: +2s penalty
+      if (mode === 'speed-run') {
+        setPenaltyMs((p) => p + 2000);
+      }
+
+      // Endless: -3s from timer
+      if (mode === 'endless') {
+        resetTimer(Math.max(0, timeMs - 3000));
+      }
 
       setTimeout(() => setError(false), 300);
     },
-    [streak, mode, lives, audio, endGame, effects],
+    [streak, mode, lives, audio, endGame, effects, resetTimer, timeMs],
   );
 
   useStratagemInput({
@@ -257,6 +290,8 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
     setShowInitialEntry(false);
     setLeaderboardRank(null);
     setLives(3);
+    setPenaltyMs(0);
+    setIsBoss(false);
     setSurvivalTimeLimit(8000);
     attemptStartRef.current = performance.now();
     attemptErrorsRef.current = 0;
@@ -286,6 +321,8 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
     attempts,
     error,
     lives,
+    penaltyMs,
+    isBoss,
     currentStratagem,
     isPlaying,
     useCountdownTimer,

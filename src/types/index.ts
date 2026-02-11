@@ -36,7 +36,11 @@ export type GameMode =
   | 'accuracy'
   | 'survival'
   | 'quiz'
-  | 'daily-challenge';
+  | 'daily-challenge'
+  | 'speed-run'
+  | 'endless'
+  | 'category-challenge'
+  | 'boss-rush';
 
 /** Game states */
 export type GameState = 'idle' | 'countdown' | 'playing' | 'paused' | 'game-over';
@@ -146,6 +150,7 @@ export type AppScreen =
   | 'menu'
   | 'mode-select'
   | 'stratagem-select'
+  | 'category-select'
   | 'game'
   | 'game-over'
   | 'stats'

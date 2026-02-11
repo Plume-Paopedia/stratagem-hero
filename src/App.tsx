@@ -1,7 +1,8 @@
 import { useState, useCallback, lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import type { GameMode, Stratagem, AppScreen } from './types';
-import { stratagems } from './data/stratagems';
+import type { GameMode, Stratagem, StratagemCategory, AppScreen } from './types';
+import { stratagems, getByCategory } from './data/stratagems';
+import { CategorySelect } from './components/game/CategorySelect';
 import { getDailySeed, seededRandom } from './utils/scoring';
 import { useSettingsStore } from './stores/settingsStore';
 import { Header } from './components/layout/Header';
@@ -35,12 +36,16 @@ function shuffleArray<T>(arr: T[], rng: () => number = Math.random): T[] {
 }
 
 const gameModes: { id: GameMode; name: string; icon: string; desc: string }[] = [
-  { id: 'free-practice', name: 'Free Practice', icon: '🏋️', desc: 'Practice at your own pace. No timer, no pressure.' },
-  { id: 'time-attack', name: 'Time Attack', icon: '⏱️', desc: 'Score as many combos as possible before time runs out.' },
-  { id: 'accuracy', name: 'Accuracy Challenge', icon: '🎯', desc: 'Complete a set number of combos with maximum precision.' },
-  { id: 'survival', name: 'Survival', icon: '🔥', desc: 'Endless combos with decreasing time limits. One mistake = game over.' },
-  { id: 'quiz', name: 'Quiz', icon: '📚', desc: 'Enter combos from memory. Only the name is shown. 3 lives.' },
-  { id: 'daily-challenge', name: 'Daily Challenge', icon: '🎲', desc: 'Same challenge for everyone today. One attempt!' },
+  { id: 'free-practice', name: 'Free Practice', icon: '\u{1F3CB}\uFE0F', desc: 'Practice at your own pace. No timer, no pressure.' },
+  { id: 'time-attack', name: 'Time Attack', icon: '\u23F1\uFE0F', desc: 'Score as many combos as possible before time runs out.' },
+  { id: 'accuracy', name: 'Accuracy Challenge', icon: '\u{1F3AF}', desc: 'Complete a set number of combos with maximum precision.' },
+  { id: 'survival', name: 'Survival', icon: '\u{1F525}', desc: 'Endless combos with decreasing time limits. One mistake = game over.' },
+  { id: 'quiz', name: 'Quiz', icon: '\u{1F4DA}', desc: 'Enter combos from memory. Only the name is shown. 3 lives.' },
+  { id: 'daily-challenge', name: 'Daily Challenge', icon: '\u{1F3B2}', desc: 'Same challenge for everyone today. One attempt!' },
+  { id: 'speed-run', name: 'Speed Run', icon: '\u{1F3C3}', desc: 'Complete all 61 stratagems ASAP. Errors add +2s penalty.' },
+  { id: 'endless', name: 'Endless', icon: '\u267E\uFE0F', desc: 'Timer resets on success. Errors subtract 3s. How far can you go?' },
+  { id: 'category-challenge', name: 'Category', icon: '\u{1F4C2}', desc: 'Master one category. Pick your specialty and race the clock.' },
+  { id: 'boss-rush', name: 'Boss Rush', icon: '\u{1F480}', desc: 'Every 10 combos a boss appears. Harder combos, double points.' },
 ];
 
 export default function App() {
@@ -66,8 +71,8 @@ export default function App() {
       return;
     }
 
-    if (mode === 'time-attack' || mode === 'survival' || mode === 'quiz') {
-      const queue = shuffleArray(stratagems).concat(shuffleArray(stratagems));
+    if (mode === 'time-attack' || mode === 'survival' || mode === 'quiz' || mode === 'endless' || mode === 'boss-rush') {
+      const queue = shuffleArray(stratagems).concat(shuffleArray(stratagems)).concat(shuffleArray(stratagems));
       setGameQueue(queue);
       setScreen('game');
       return;
@@ -80,8 +85,27 @@ export default function App() {
       return;
     }
 
+    if (mode === 'speed-run') {
+      const queue = shuffleArray(stratagems);
+      setGameQueue(queue);
+      setScreen('game');
+      return;
+    }
+
+    if (mode === 'category-challenge') {
+      setScreen('category-select');
+      return;
+    }
+
     setScreen('stratagem-select');
   }, [audio, settings.accuracyTargetCount]);
+
+  const handleCategorySelect = useCallback((category: StratagemCategory) => {
+    audio.menuClick();
+    const catStratagems = getByCategory(category);
+    setGameQueue(shuffleArray(catStratagems));
+    setScreen('game');
+  }, [audio]);
 
   const handleToggleStratagem = useCallback((id: string) => {
     setSelectedStratagems((prev) => {
@@ -144,6 +168,12 @@ export default function App() {
           {screen === 'menu' && (
             <PageTransition key="menu">
               <MainMenu onModeSelect={handleModeSelect} />
+            </PageTransition>
+          )}
+
+          {screen === 'category-select' && (
+            <PageTransition key="category-select">
+              <CategorySelect onSelect={handleCategorySelect} onBack={goHome} />
             </PageTransition>
           )}
 

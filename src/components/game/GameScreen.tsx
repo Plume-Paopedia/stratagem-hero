@@ -11,6 +11,7 @@ import { HellpodDrop } from '../ui/HellpodDrop';
 import { StreakFire } from '../ui/StreakFire';
 import { GlitchEffect } from '../ui/GlitchEffect';
 import { StreakAnnouncement } from '../ui/StreakAnnouncement';
+import { BossIndicator } from '../ui/BossIndicator';
 import { ArcadeInitialEntry } from '../leaderboard/ArcadeInitialEntry';
 import { Countdown } from './Countdown';
 import { Timer } from './Timer';
@@ -103,20 +104,33 @@ export function GameScreen({ mode, queue, onExit, onViewLeaderboard }: GameScree
             <div className="flex flex-col items-end gap-2">
               {game.useCountdownTimer && <Timer timeMs={game.timeMs} />}
               {!game.useCountdownTimer && mode !== 'free-practice' && (
-                <Timer timeMs={game.elapsedMs} warningMs={0} />
+                <Timer timeMs={mode === 'speed-run' ? game.elapsedMs + game.penaltyMs : game.elapsedMs} warningMs={0} />
               )}
               {mode === 'quiz' && (
                 <div className="font-display text-lg text-hd-white">
-                  Lives: {'❤️'.repeat(game.lives)}{'🖤'.repeat(3 - game.lives)}
+                  Lives: {'\u2764\uFE0F'.repeat(game.lives)}{'\u{1F5A4}'.repeat(3 - game.lives)}
                 </div>
               )}
-              {mode === 'accuracy' && (
+              {(mode === 'accuracy' || mode === 'speed-run' || mode === 'category-challenge') && (
                 <div className="text-sm font-heading text-hd-gray">
                   {game.currentIndex + 1} / {queue.length}
                 </div>
               )}
+              {mode === 'speed-run' && game.penaltyMs > 0 && (
+                <div className="text-xs font-heading text-hd-red">
+                  +{(game.penaltyMs / 1000).toFixed(0)}s penalty
+                </div>
+              )}
+              {mode === 'endless' && (
+                <div className="text-sm font-heading text-hd-gray">
+                  Distance: {game.streak}
+                </div>
+              )}
             </div>
           </div>
+
+          {/* Boss indicator */}
+          {mode === 'boss-rush' && <BossIndicator active={game.isBoss} />}
 
           {/* Center: Combo display */}
           <div className="relative">
