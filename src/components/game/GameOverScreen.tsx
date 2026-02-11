@@ -1,3 +1,4 @@
+import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import type { GameMode, StratagemAttempt } from '../../types';
 import { Button } from '../ui/Button';
@@ -34,11 +35,28 @@ export function GameOverScreen({
     ? attempts.filter((a) => a.success).reduce((s, a) => s + a.timeMs, 0) / successes
     : 0;
 
+  const [copied, setCopied] = useState(false);
+
   // Find fastest/slowest
   const successAttempts = attempts.filter((a) => a.success);
   const fastest = successAttempts.length > 0
     ? successAttempts.reduce((a, b) => (a.timeMs < b.timeMs ? a : b))
     : null;
+
+  const modeLabel = mode.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
+  const handleShare = useCallback(() => {
+    const text = [
+      'Stratagem Hero',
+      `Mode: ${modeLabel} | Score: ${score.toLocaleString()}`,
+      `Streak: ${bestStreak} | Accuracy: ${accuracy}%`,
+      '#StratagemHero #Helldivers2',
+    ].join('\n');
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [modeLabel, score, bestStreak, accuracy]);
 
   return (
     <motion.div
@@ -77,8 +95,13 @@ export function GameOverScreen({
         {score.toLocaleString()}
       </motion.div>
 
-      {/* Stats grid */}
-      <div className="grid grid-cols-2 gap-4 w-full">
+      {/* Stats grid - staggered reveal */}
+      <motion.div
+        className="grid grid-cols-2 gap-4 w-full"
+        initial="hidden"
+        animate="visible"
+        variants={{ visible: { transition: { staggerChildren: 0.08, delayChildren: 0.4 } } }}
+      >
         <StatBlock label="Completed" value={`${successes}/${attempts.length}`} />
         <StatBlock label="Accuracy" value={`${accuracy}%`} />
         <StatBlock label="Best Streak" value={String(bestStreak)} />
@@ -91,7 +114,7 @@ export function GameOverScreen({
             sub={stratagemMap.get(fastest.stratagemId)?.name}
           />
         )}
-      </div>
+      </motion.div>
 
       {/* Leaderboard mini */}
       {mode !== 'free-practice' && (
@@ -112,12 +135,21 @@ export function GameOverScreen({
         </Button>
       </div>
 
-      <p className="text-xs text-hd-gray/50 font-heading uppercase tracking-wider mt-4">
-        Mode: {mode.replace('-', ' ')}
+      <Button variant="ghost" size="sm" onClick={handleShare}>
+        {copied ? 'Copied!' : 'Share Results'}
+      </Button>
+
+      <p className="text-xs text-hd-gray/50 font-heading uppercase tracking-wider mt-2">
+        Mode: {modeLabel}
       </p>
     </motion.div>
   );
 }
+
+const statVariants = {
+  hidden: { opacity: 0, y: 15 },
+  visible: { opacity: 1, y: 0 },
+};
 
 function StatBlock({
   label,
@@ -129,10 +161,10 @@ function StatBlock({
   sub?: string;
 }) {
   return (
-    <div className="bg-hd-dark border border-hd-border rounded p-3">
+    <motion.div variants={statVariants} className="bg-hd-dark border border-hd-border rounded p-3">
       <div className="text-xs text-hd-gray uppercase tracking-wider font-heading">{label}</div>
       <div className="font-display text-xl text-hd-white mt-1">{value}</div>
       {sub && <div className="text-xs text-hd-gray mt-0.5">{sub}</div>}
-    </div>
+    </motion.div>
   );
 }
