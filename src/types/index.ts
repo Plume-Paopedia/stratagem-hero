@@ -150,4 +150,5 @@ export type AppScreen =
   | 'game-over'
   | 'stats'
   | 'settings'
-  | 'leaderboard';
+  | 'leaderboard'
+  | 'achievements';

@@ -16,11 +16,14 @@ import { ScreenErrorBoundary } from './components/errors/ScreenErrorBoundary';
 import { useAudio } from './hooks/useAudio';
 import { useFactionStore } from './stores/factionStore';
 
+import { AchievementToast } from './components/achievements/AchievementToast';
+
 // Lazy-loaded screens
 const StratagemGrid = lazy(() => import('./components/stratagem/StratagemGrid').then(m => ({ default: m.StratagemGrid })));
 const SettingsPanel = lazy(() => import('./components/settings/SettingsPanel').then(m => ({ default: m.SettingsPanel })));
 const StatsOverview = lazy(() => import('./components/stats/StatsOverview').then(m => ({ default: m.StatsOverview })));
 const LeaderboardScreen = lazy(() => import('./components/leaderboard/LeaderboardScreen').then(m => ({ default: m.LeaderboardScreen })));
+const AchievementsScreen = lazy(() => import('./components/achievements/AchievementsScreen').then(m => ({ default: m.AchievementsScreen })));
 
 function shuffleArray<T>(arr: T[], rng: () => number = Math.random): T[] {
   const shuffled = [...arr];
@@ -131,6 +134,7 @@ export default function App() {
         onStats={() => setScreen('stats')}
         onSettings={() => setScreen('settings')}
         onLeaderboard={() => goToLeaderboard()}
+        onAchievements={() => setScreen('achievements')}
         onHome={goHome}
         showBack={screen !== 'menu'}
       />
@@ -220,9 +224,20 @@ export default function App() {
               </ScreenErrorBoundary>
             </PageTransition>
           )}
+
+          {screen === 'achievements' && (
+            <PageTransition key="achievements">
+              <ScreenErrorBoundary onReset={goHome}>
+                <Suspense fallback={<LoadingSkeleton lines={4} />}>
+                  <AchievementsScreen onClose={goHome} />
+                </Suspense>
+              </ScreenErrorBoundary>
+            </PageTransition>
+          )}
         </AnimatePresence>
       </main>
 
+      <AchievementToast />
       <Footer />
     </div>
   );

@@ -8,6 +8,8 @@ import { useStatsStore } from '../stores/statsStore';
 import { useFactionStore } from '../stores/factionStore';
 import { useLeaderboardStore } from '../stores/leaderboardStore';
 import { getStreakMultiplier, calculateScore, calculateAccuracy } from '../utils/scoring';
+import { checkSessionAchievements, checkLiveAchievement } from '../utils/achievementChecker';
+import { useStatsStore as getStatsState } from '../stores/statsStore';
 import type { GameEffects } from './useGameEffects';
 
 interface UseGameLogicOptions {
@@ -45,6 +47,7 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
   const attemptStartRef = useRef(performance.now());
   const attemptErrorsRef = useRef(0);
   const totalTimeRef = useRef(0);
+  const consecutiveFastRef = useRef(0);
 
   const currentStratagem = queue[currentIndex] ?? null;
   const isPlaying = state === 'playing';
@@ -119,6 +122,20 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
       attemptStartRef.current = performance.now();
       attemptErrorsRef.current = 0;
 
+      // Track consecutive fast completions
+      if (timeMs < 1000) {
+        consecutiveFastRef.current += 1;
+      } else {
+        consecutiveFastRef.current = 0;
+      }
+
+      // Live achievement checks
+      checkLiveAchievement('combo-complete', {
+        timeMs,
+        consecutiveFastCount: consecutiveFastRef.current,
+      });
+      checkLiveAchievement('streak', { streak: newStreak, multiplier: newMult });
+
       // Trigger effects
       effects.fireSuccess(strat.name, newMult);
       audio.successJingle();
@@ -159,6 +176,7 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
       setError(true);
       setInputIndex(0);
       attemptErrorsRef.current += 1;
+      consecutiveFastRef.current = 0;
       audio.errorBuzz();
 
       effects.fireError();
@@ -189,12 +207,12 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
     onError: handleError,
   });
 
-  // Record stats on game over + check leaderboard
+  // Record stats on game over + check leaderboard + achievements
   useEffect(() => {
     if (state !== 'game-over') return;
     const duration = totalTimeRef.current;
     const successes = attempts.filter((a) => a.success).length;
-    recordStats({
+    const sessionStats = {
       mode,
       date: Date.now(),
       duration,
@@ -206,7 +224,11 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
         successes > 0
           ? attempts.filter((a) => a.success).reduce((s, a) => s + a.timeMs, 0) / successes
           : 0,
-    });
+    };
+    recordStats(sessionStats);
+
+    // Check achievements with updated global stats
+    checkSessionAchievements(sessionStats, getStatsState.getState());
 
     if (qualifiesForLeaderboard(mode, score)) {
       const rank = getRankForScore(mode, score);
@@ -238,6 +260,7 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
     setSurvivalTimeLimit(8000);
     attemptStartRef.current = performance.now();
     attemptErrorsRef.current = 0;
+    consecutiveFastRef.current = 0;
     totalTimeRef.current = 0;
     effects.resetEffects();
     setState('countdown');

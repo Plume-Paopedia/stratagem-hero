@@ -6,11 +6,12 @@ interface HeaderProps {
   onStats: () => void;
   onSettings: () => void;
   onLeaderboard: () => void;
+  onAchievements: () => void;
   onHome: () => void;
   showBack?: boolean;
 }
 
-export function Header({ onStats, onSettings, onLeaderboard, onHome, showBack = false }: HeaderProps) {
+export function Header({ onStats, onSettings, onLeaderboard, onAchievements, onHome, showBack = false }: HeaderProps) {
   const musicEnabled = useSettingsStore((s) => s.musicEnabled);
   const toggleMusic = useSettingsStore((s) => s.toggleMusic);
 
@@ -61,6 +62,9 @@ export function Header({ onStats, onSettings, onLeaderboard, onHome, showBack = 
 
         <Button variant="ghost" size="sm" onClick={onLeaderboard}>
           Scores
+        </Button>
+        <Button variant="ghost" size="sm" onClick={onAchievements}>
+          Trophies
         </Button>
         <Button variant="ghost" size="sm" onClick={onStats}>
           Stats
