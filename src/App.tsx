@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { GameMode, Stratagem, AppScreen } from './types';
 import { stratagems } from './data/stratagems';
@@ -7,16 +7,20 @@ import { useSettingsStore } from './stores/settingsStore';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { GameScreen } from './components/game/GameScreen';
-import { StratagemGrid } from './components/stratagem/StratagemGrid';
-import { SettingsPanel } from './components/settings/SettingsPanel';
-import { StatsOverview } from './components/stats/StatsOverview';
-import { LeaderboardScreen } from './components/leaderboard/LeaderboardScreen';
 import { Button } from './components/ui/Button';
 import { ScanlineOverlay } from './components/ui/ScanlineOverlay';
 import { AmbientParticles } from './components/ui/AmbientParticles';
 import { FactionBackground } from './components/ui/FactionBackground';
+import { LoadingSkeleton } from './components/ui/LoadingSkeleton';
+import { ScreenErrorBoundary } from './components/errors/ScreenErrorBoundary';
 import { useAudio } from './hooks/useAudio';
 import { useFactionStore } from './stores/factionStore';
+
+// Lazy-loaded screens
+const StratagemGrid = lazy(() => import('./components/stratagem/StratagemGrid').then(m => ({ default: m.StratagemGrid })));
+const SettingsPanel = lazy(() => import('./components/settings/SettingsPanel').then(m => ({ default: m.SettingsPanel })));
+const StatsOverview = lazy(() => import('./components/stats/StatsOverview').then(m => ({ default: m.StatsOverview })));
+const LeaderboardScreen = lazy(() => import('./components/leaderboard/LeaderboardScreen').then(m => ({ default: m.LeaderboardScreen })));
 
 function shuffleArray<T>(arr: T[], rng: () => number = Math.random): T[] {
   const shuffled = [...arr];
@@ -141,61 +145,79 @@ export default function App() {
 
           {screen === 'stratagem-select' && (
             <PageTransition key="stratagem-select">
-              <div className="h-full flex flex-col gap-4 p-6">
-                <div className="flex items-center justify-between">
-                  <h2 className="font-display text-xl text-hd-yellow uppercase tracking-wider">
-                    Select Stratagems
-                  </h2>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" onClick={handleSelectAll}>
-                      {selectedStratagems.size === stratagems.length ? 'Deselect All' : 'Select All'}
-                    </Button>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={handleStartFreePractice}
-                      disabled={selectedStratagems.size === 0}
-                    >
-                      Start ({selectedStratagems.size})
-                    </Button>
+              <ScreenErrorBoundary onReset={goHome}>
+                <div className="h-full flex flex-col gap-4 p-6">
+                  <div className="flex items-center justify-between">
+                    <h2 className="font-display text-xl text-hd-yellow uppercase tracking-wider">
+                      Select Stratagems
+                    </h2>
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" onClick={handleSelectAll}>
+                        {selectedStratagems.size === stratagems.length ? 'Deselect All' : 'Select All'}
+                      </Button>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={handleStartFreePractice}
+                        disabled={selectedStratagems.size === 0}
+                      >
+                        Start ({selectedStratagems.size})
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    <Suspense fallback={<LoadingSkeleton lines={5} />}>
+                      <StratagemGrid
+                        selected={selectedStratagems}
+                        onToggle={handleToggleStratagem}
+                      />
+                    </Suspense>
                   </div>
                 </div>
-                <div className="flex-1 overflow-hidden">
-                  <StratagemGrid
-                    selected={selectedStratagems}
-                    onToggle={handleToggleStratagem}
-                  />
-                </div>
-              </div>
+              </ScreenErrorBoundary>
             </PageTransition>
           )}
 
           {screen === 'game' && selectedMode && (
             <PageTransition key="game">
-              <GameScreen
-                mode={selectedMode}
-                queue={gameQueue}
-                onExit={goHome}
-                onViewLeaderboard={goToLeaderboard}
-              />
+              <ScreenErrorBoundary onReset={goHome}>
+                <GameScreen
+                  mode={selectedMode}
+                  queue={gameQueue}
+                  onExit={goHome}
+                  onViewLeaderboard={goToLeaderboard}
+                />
+              </ScreenErrorBoundary>
             </PageTransition>
           )}
 
           {screen === 'stats' && (
             <PageTransition key="stats">
-              <StatsOverview onClose={goHome} />
+              <ScreenErrorBoundary onReset={goHome}>
+                <Suspense fallback={<LoadingSkeleton lines={4} />}>
+                  <StatsOverview onClose={goHome} />
+                </Suspense>
+              </ScreenErrorBoundary>
             </PageTransition>
           )}
 
           {screen === 'settings' && (
             <PageTransition key="settings">
-              <SettingsPanel onClose={goHome} />
+              <ScreenErrorBoundary onReset={goHome}>
+                <Suspense fallback={<LoadingSkeleton lines={4} />}>
+                  <SettingsPanel onClose={goHome} />
+                </Suspense>
+              </ScreenErrorBoundary>
             </PageTransition>
           )}
 
           {screen === 'leaderboard' && (
             <PageTransition key="leaderboard">
-              <LeaderboardScreen onClose={goHome} initialMode={leaderboardMode} />
+              <ScreenErrorBoundary onReset={goHome}>
+                <Suspense fallback={<LoadingSkeleton lines={4} />}>
+                  <LeaderboardScreen onClose={goHome} initialMode={leaderboardMode} />
+                </Suspense>
+              </ScreenErrorBoundary>
             </PageTransition>
           )}
         </AnimatePresence>

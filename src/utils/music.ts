@@ -2,15 +2,19 @@
  * 8-bit Helldivers 2 music engine.
  * Chiptune renditions of HD2-inspired heroic themes.
  * All synthesized in real-time via Web Audio API — zero external files.
+ * Uses AudioContext scheduling for drift-free playback.
  */
 
 let ctx: AudioContext | null = null;
 let masterGain: GainNode | null = null;
 let isPlaying = false;
-let intervalId: number | null = null;
+let schedulerTimer: number | null = null;
 let currentBeat = 0;
 let phraseIndex = 0;
+let nextBeatTime = 0;
 const bpm = 150;
+const LOOKAHEAD_MS = 25;    // How often the scheduler runs (ms)
+const SCHEDULE_AHEAD = 0.1; // How far ahead to schedule (seconds)
 
 function getCtx(): AudioContext {
   if (!ctx) {
@@ -40,14 +44,13 @@ const NOTE: Record<string, number> = {
 // ── 8-bit Instrument voices ──────────────────────────────────────────
 
 /** NES-style pulse lead with vibrato */
-function playLead(freq: number, duration: number, volume: number) {
+function playLead(freq: number, duration: number, volume: number, at: number) {
   const c = getCtx();
   const m = getMaster();
-  const now = c.currentTime;
 
   const osc = c.createOscillator();
   osc.type = 'square';
-  osc.frequency.setValueAtTime(freq, now);
+  osc.frequency.setValueAtTime(freq, at);
 
   // Vibrato LFO
   const lfo = c.createOscillator();
@@ -56,93 +59,89 @@ function playLead(freq: number, duration: number, volume: number) {
   lfoGain.gain.value = freq * 0.015; // ~1.5% pitch wobble
   lfo.connect(lfoGain);
   lfoGain.connect(osc.frequency);
-  lfo.start(now);
-  lfo.stop(now + duration);
+  lfo.start(at);
+  lfo.stop(at + duration);
 
   const g = c.createGain();
-  g.gain.setValueAtTime(volume, now);
-  g.gain.setValueAtTime(volume * 0.9, now + duration * 0.7);
-  g.gain.exponentialRampToValueAtTime(0.001, now + duration);
+  g.gain.setValueAtTime(volume, at);
+  g.gain.setValueAtTime(volume * 0.9, at + duration * 0.7);
+  g.gain.exponentialRampToValueAtTime(0.001, at + duration);
 
   osc.connect(g).connect(m);
-  osc.start(now);
-  osc.stop(now + duration);
+  osc.start(at);
+  osc.stop(at + duration);
 }
 
 /** Chiptune arpeggio — rapidly cycles chord tones */
-function playArpeggio(notes: number[], speed: number, duration: number, volume: number) {
+function playArpeggio(notes: number[], speed: number, duration: number, volume: number, at: number) {
   const c = getCtx();
   const m = getMaster();
-  const now = c.currentTime;
 
   const osc = c.createOscillator();
   osc.type = 'square';
 
   // Schedule rapid frequency changes
   const cycleTime = speed;
-  let t = now;
-  while (t < now + duration) {
+  let t = at;
+  while (t < at + duration) {
     for (const note of notes) {
-      if (t >= now + duration) break;
+      if (t >= at + duration) break;
       osc.frequency.setValueAtTime(note, t);
       t += cycleTime;
     }
   }
 
   const g = c.createGain();
-  g.gain.setValueAtTime(volume * 0.5, now);
-  g.gain.exponentialRampToValueAtTime(0.001, now + duration);
+  g.gain.setValueAtTime(volume * 0.5, at);
+  g.gain.exponentialRampToValueAtTime(0.001, at + duration);
 
   osc.connect(g).connect(m);
-  osc.start(now);
-  osc.stop(now + duration);
+  osc.start(at);
+  osc.stop(at + duration);
 }
 
 /** Triangle wave bass (classic NES) */
-function playBass(freq: number, duration: number, volume: number) {
+function playBass(freq: number, duration: number, volume: number, at: number) {
   const c = getCtx();
   const m = getMaster();
-  const now = c.currentTime;
 
   const osc = c.createOscillator();
   osc.type = 'triangle';
-  osc.frequency.setValueAtTime(freq, now);
+  osc.frequency.setValueAtTime(freq, at);
 
   const g = c.createGain();
-  g.gain.setValueAtTime(volume, now);
-  g.gain.setValueAtTime(volume * 0.8, now + duration * 0.6);
-  g.gain.exponentialRampToValueAtTime(0.001, now + duration);
+  g.gain.setValueAtTime(volume, at);
+  g.gain.setValueAtTime(volume * 0.8, at + duration * 0.6);
+  g.gain.exponentialRampToValueAtTime(0.001, at + duration);
 
   osc.connect(g).connect(m);
-  osc.start(now);
-  osc.stop(now + duration);
+  osc.start(at);
+  osc.stop(at + duration);
 }
 
 /** 8-bit kick drum — short triangle pitch sweep */
-function playKick(volume: number) {
+function playKick(volume: number, at: number) {
   const c = getCtx();
   const m = getMaster();
-  const now = c.currentTime;
 
   const osc = c.createOscillator();
   osc.type = 'triangle';
-  osc.frequency.setValueAtTime(150, now);
-  osc.frequency.exponentialRampToValueAtTime(40, now + 0.08);
+  osc.frequency.setValueAtTime(150, at);
+  osc.frequency.exponentialRampToValueAtTime(40, at + 0.08);
 
   const g = c.createGain();
-  g.gain.setValueAtTime(volume, now);
-  g.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+  g.gain.setValueAtTime(volume, at);
+  g.gain.exponentialRampToValueAtTime(0.001, at + 0.1);
 
   osc.connect(g).connect(m);
-  osc.start(now);
-  osc.stop(now + 0.12);
+  osc.start(at);
+  osc.stop(at + 0.12);
 }
 
 /** 8-bit snare — noise + triangle hit */
-function playSnare(volume: number) {
+function playSnare(volume: number, at: number) {
   const c = getCtx();
   const m = getMaster();
-  const now = c.currentTime;
 
   // Noise burst
   const bufSize = c.sampleRate * 0.08;
@@ -154,30 +153,29 @@ function playSnare(volume: number) {
   const src = c.createBufferSource();
   src.buffer = buf;
   const ng = c.createGain();
-  ng.gain.setValueAtTime(volume * 0.5, now);
-  ng.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+  ng.gain.setValueAtTime(volume * 0.5, at);
+  ng.gain.exponentialRampToValueAtTime(0.001, at + 0.08);
 
   // Tonal hit
   const osc = c.createOscillator();
   osc.type = 'triangle';
-  osc.frequency.setValueAtTime(300, now);
-  osc.frequency.exponentialRampToValueAtTime(100, now + 0.05);
+  osc.frequency.setValueAtTime(300, at);
+  osc.frequency.exponentialRampToValueAtTime(100, at + 0.05);
   const og = c.createGain();
-  og.gain.setValueAtTime(volume * 0.4, now);
-  og.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+  og.gain.setValueAtTime(volume * 0.4, at);
+  og.gain.exponentialRampToValueAtTime(0.001, at + 0.06);
 
   src.connect(ng).connect(m);
   osc.connect(og).connect(m);
-  src.start(now);
-  osc.start(now);
-  osc.stop(now + 0.08);
+  src.start(at);
+  osc.start(at);
+  osc.stop(at + 0.08);
 }
 
 /** 8-bit hihat — filtered noise, very short */
-function playHihat(volume: number) {
+function playHihat(volume: number, at: number) {
   const c = getCtx();
   const m = getMaster();
-  const now = c.currentTime;
 
   const bufSize = c.sampleRate * 0.03;
   const buf = c.createBuffer(1, bufSize, c.sampleRate);
@@ -194,18 +192,17 @@ function playHihat(volume: number) {
   bp.Q.value = 1;
 
   const g = c.createGain();
-  g.gain.setValueAtTime(volume * 0.2, now);
-  g.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+  g.gain.setValueAtTime(volume * 0.2, at);
+  g.gain.exponentialRampToValueAtTime(0.001, at + 0.03);
 
   src.connect(bp).connect(g).connect(m);
-  src.start(now);
+  src.start(at);
 }
 
 /** Crash cymbal for phrase transitions */
-function playCrash(volume: number) {
+function playCrash(volume: number, at: number) {
   const c = getCtx();
   const m = getMaster();
-  const now = c.currentTime;
 
   const bufSize = c.sampleRate * 0.3;
   const buf = c.createBuffer(1, bufSize, c.sampleRate);
@@ -221,11 +218,11 @@ function playCrash(volume: number) {
   hp.frequency.value = 4000;
 
   const g = c.createGain();
-  g.gain.setValueAtTime(volume * 0.25, now);
-  g.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+  g.gain.setValueAtTime(volume * 0.25, at);
+  g.gain.exponentialRampToValueAtTime(0.001, at + 0.3);
 
   src.connect(hp).connect(g).connect(m);
-  src.start(now);
+  src.start(at);
 }
 
 // ── Composition: HD2-inspired 8-bit themes ───────────────────────────
@@ -305,9 +302,9 @@ const songStructure = [0, 0, 1, 0, 1, 1, 2, 0]; // indexes into theme arrays
 const themes = [themeA, themeB, themeC];
 const basses = [bassA, bassB, bassC];
 
-// ── Beat tick ─────────────────────────────────────────────────────────
+// ── Beat scheduling ──────────────────────────────────────────────────
 
-function tick() {
+function scheduleBeat(at: number) {
   const beatInPhrase = currentBeat % 32;
   const structureIndex = phraseIndex % songStructure.length;
   const themeIdx = songStructure[structureIndex];
@@ -318,25 +315,25 @@ function tick() {
 
   // Crash on phrase start
   if (beatInPhrase === 0 && phraseIndex > 0) {
-    playCrash(0.5);
+    playCrash(0.5, at);
   }
 
   // Drums
   const drum = drums[beatInPhrase];
-  if (drum === 'K') playKick(0.55);
-  else if (drum === 'S') playSnare(0.45);
-  else if (drum === 'H') playHihat(0.4);
+  if (drum === 'K') playKick(0.55, at);
+  else if (drum === 'S') playSnare(0.45, at);
+  else if (drum === 'H') playHihat(0.4, at);
 
   // Bass (triangle)
   const bassNote = bass[beatInPhrase];
   if (bassNote && NOTE[bassNote]) {
-    playBass(NOTE[bassNote], 0.25, 0.3);
+    playBass(NOTE[bassNote], 0.25, 0.3, at);
   }
 
   // Lead melody (pulse/square with vibrato)
   const melNote = melody[beatInPhrase];
   if (melNote && NOTE[melNote]) {
-    playLead(NOTE[melNote], 0.18, 0.18);
+    playLead(NOTE[melNote], 0.18, 0.18, at);
   }
 
   // Arpeggios (only on theme A phrases, every 8 beats)
@@ -344,13 +341,26 @@ function tick() {
     const chord = arpA[beatInPhrase]!;
     const freqs = chord.map((n) => NOTE[n]).filter(Boolean);
     if (freqs.length === 3) {
-      playArpeggio(freqs, 0.04, 0.25, 0.12);
+      playArpeggio(freqs, 0.04, 0.25, 0.12, at);
     }
   }
 
   currentBeat++;
   if (beatInPhrase === 31) {
     phraseIndex++;
+  }
+}
+
+/** Lookahead scheduler: runs frequently, schedules beats ahead using precise AudioContext time */
+function scheduler() {
+  const c = getCtx();
+  while (nextBeatTime < c.currentTime + SCHEDULE_AHEAD) {
+    scheduleBeat(nextBeatTime);
+    const eighthNote = 60 / bpm / 2;
+    nextBeatTime += eighthNote;
+  }
+  if (isPlaying) {
+    schedulerTimer = window.setTimeout(scheduler, LOOKAHEAD_MS);
   }
 }
 
@@ -362,18 +372,18 @@ export function startMusic(volume: number) {
   currentBeat = 0;
   phraseIndex = 0;
 
-  getCtx();
+  const c = getCtx();
   if (masterGain) masterGain.gain.value = volume;
 
-  const eighthNote = 60 / bpm / 2;
-  intervalId = window.setInterval(tick, eighthNote * 1000);
+  nextBeatTime = c.currentTime + 0.05; // Small offset to prevent glitch
+  scheduler();
 }
 
 export function stopMusic() {
   isPlaying = false;
-  if (intervalId !== null) {
-    clearInterval(intervalId);
-    intervalId = null;
+  if (schedulerTimer !== null) {
+    clearTimeout(schedulerTimer);
+    schedulerTimer = null;
   }
 }
 

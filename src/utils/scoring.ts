@@ -37,9 +37,9 @@ export function calculateAccuracy(correct: number, total: number): number {
   return Math.round((correct / total) * 1000) / 10;
 }
 
-/** Generate deterministic daily seed from date */
+/** Generate deterministic daily seed from date (UTC to ensure same challenge globally) */
 export function getDailySeed(date: Date = new Date()): number {
-  const str = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+  const str = `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`;
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     const ch = str.charCodeAt(i);
