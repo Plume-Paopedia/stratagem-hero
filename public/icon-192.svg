@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <rect width="192" height="192" rx="24" fill="#0a0a0f"/>
+  <g transform="translate(96,96)">
+    <!-- Eagle silhouette -->
+    <path d="M0-50 L20-30 L40-10 L35 5 L25 0 L15 10 L0 5 L-15 10 L-25 0 L-35 5 L-40-10 L-20-30 Z" fill="#f5c518" opacity="0.9"/>
+    <!-- Directional arrows (stratagem cross) -->
+    <g fill="none" stroke="#f5c518" stroke-width="3" stroke-linecap="round">
+      <path d="M0 20 L0 50 M-8 42 L0 50 L8 42"/>
+      <path d="M-20 35 L-40 35 M-32 27 L-40 35 L-32 43"/>
+      <path d="M20 35 L40 35 M32 27 L40 35 L32 43"/>
+      <path d="M0 20 L0 20"/>
+    </g>
+  </g>
+</svg>

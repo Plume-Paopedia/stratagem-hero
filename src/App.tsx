@@ -22,6 +22,8 @@ import { useAudio } from './hooks/useAudio';
 import { useFactionStore } from './stores/factionStore';
 
 import { AchievementToast } from './components/achievements/AchievementToast';
+import { InstallPrompt } from './components/pwa/InstallPrompt';
+import { OfflineBanner } from './components/pwa/OfflineBanner';
 
 // Lazy-loaded screens
 const StratagemGrid = lazy(() => import('./components/stratagem/StratagemGrid').then(m => ({ default: m.StratagemGrid })));
@@ -325,6 +327,8 @@ export default function App() {
       </main>
 
       <AchievementToast />
+      <OfflineBanner />
+      <InstallPrompt />
       <Footer />
     </div>
   );
