@@ -19,6 +19,17 @@ export function Footer({ onHelp }: FooterProps) {
         )}
         <span>|</span>
         <span>Pour Super Terre !</span>
+        <span>|</span>
+        <a
+          href="https://github.com/nvigneux/Helldivers-2-Stratagems-icons-svg"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-hd-yellow transition-colors"
+        >
+          Icones : nvigneux
+        </a>
+        <span>|</span>
+        <span>HD2 © Arrowhead / Sony</span>
       </div>
     </footer>
   );
