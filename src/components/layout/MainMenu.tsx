@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import type { GameMode } from '../../types';
 
-export const gameModes: { id: GameMode; name: string; icon: string; desc: string }[] = [
+const gameModes: { id: GameMode; name: string; icon: string; desc: string }[] = [
   { id: 'free-practice', name: 'Entrainement Libre', icon: '\u{1F3CB}\uFE0F', desc: 'Pratiquez a votre rythme. Pas de chrono, pas de pression.' },
   { id: 'time-attack', name: 'Contre-la-Montre', icon: '\u23F1\uFE0F', desc: 'Marquez un max de combos avant la fin du temps.' },
   { id: 'accuracy', name: 'Defi Precision', icon: '\u{1F3AF}', desc: 'Completez un nombre defini de combos avec un max de precision.' },
