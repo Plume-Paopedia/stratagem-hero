@@ -20,6 +20,7 @@ import { LoadingSkeleton } from './components/ui/LoadingSkeleton';
 import { ScreenErrorBoundary } from './components/errors/ScreenErrorBoundary';
 import { useAudio } from './hooks/useAudio';
 import { useFactionStore } from './stores/factionStore';
+import { switchTrack } from './utils/music';
 
 import { AchievementToast } from './components/achievements/AchievementToast';
 import { InstallPrompt } from './components/pwa/InstallPrompt';
@@ -194,6 +195,7 @@ export default function App() {
   const goHome = useCallback(() => {
     setScreen('menu');
     setSelectedMode(null);
+    switchTrack('menu');
   }, []);
 
   const goToLeaderboard = useCallback((mode?: GameMode) => {

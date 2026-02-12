@@ -29,6 +29,8 @@ export function Footer({ onHelp }: FooterProps) {
           Icones : nvigneux
         </a>
         <span>|</span>
+        <span>Musique : Wilbert Roget, II</span>
+        <span>|</span>
         <span>HD2 © Arrowhead / Sony</span>
       </div>
     </footer>

@@ -5,6 +5,7 @@ import { useCustomModeStore } from '../../stores/customModeStore';
 import { useGameEffects } from '../../hooks/useGameEffects';
 import { useGameLogic } from '../../hooks/useGameLogic';
 import { useGameKeyboard } from '../../hooks/useGameKeyboard';
+import { switchTrack } from '../../utils/music';
 import { ComboDisplay } from '../stratagem/ComboDisplay';
 import { InputFeedback } from '../stratagem/InputFeedback';
 import { ParticleEffect } from '../ui/ParticleEffect';
@@ -32,6 +33,13 @@ export function GameScreen({ mode, queue, onExit, onViewLeaderboard }: GameScree
   const effects = useGameEffects();
   const game = useGameLogic({ mode, queue, effects });
   const customConfig = useCustomModeStore((s) => s.activeConfig);
+
+  // Switch music track based on game state
+  useEffect(() => {
+    if (game.state === 'countdown') switchTrack('countdown');
+    else if (game.state === 'playing') switchTrack('gameplay');
+    else if (game.state === 'game-over') switchTrack('gameover');
+  }, [game.state]);
 
   // Continuous shake at x4 multiplier
   useEffect(() => {
