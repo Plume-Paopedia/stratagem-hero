@@ -2,7 +2,6 @@ import { useCallback } from 'react';
 import { useSettingsStore } from '../stores/settingsStore';
 import * as audio from '../utils/audio';
 
-/** Hook providing themed sound effects */
 export function useAudio() {
   const masterVolume = useSettingsStore((s) => s.masterVolume);
   const sfxEnabled = useSettingsStore((s) => s.sfxEnabled);

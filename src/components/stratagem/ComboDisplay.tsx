@@ -61,7 +61,6 @@ export function ComboDisplay({
         </div>
       )}
 
-      {/* Progress dots */}
       <div className="flex gap-2">
         {stratagem.sequence.map((_, i) => (
           <motion.div

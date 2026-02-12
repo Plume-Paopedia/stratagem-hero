@@ -63,7 +63,7 @@ export function getDataSizeKB(): number {
   let total = 0;
   for (const key of [STATS_KEY, SETTINGS_KEY, ACHIEVEMENTS_KEY, CUSTOM_MODES_KEY, LEADERBOARD_KEY]) {
     const val = localStorage.getItem(key);
-    if (val) total += val.length * 2; // UTF-16
+    if (val) total += val.length * 2;
   }
   return Math.round(total / 1024);
 }

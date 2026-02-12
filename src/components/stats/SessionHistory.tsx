@@ -38,7 +38,6 @@ export function SessionHistory({ sessions }: SessionHistoryProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Mode filter */}
       <div className="flex gap-1 flex-wrap">
         <button
           onClick={() => setFilterMode('all')}
@@ -65,7 +64,6 @@ export function SessionHistory({ sessions }: SessionHistoryProps) {
         ))}
       </div>
 
-      {/* Session list */}
       <div className="flex flex-col gap-1.5 max-h-[300px] overflow-y-auto pr-1">
         {filtered.slice().reverse().map((session, i) => (
           <div

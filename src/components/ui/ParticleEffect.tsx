@@ -35,7 +35,7 @@ export function ParticleEffect({
   const runningRef = useRef(false);
 
   const m = Math.min(multiplier, 4);
-  const totalCount = Math.min(count * m, 60); // Cap max particles
+  const totalCount = Math.min(count * m, 60);
   const maxSize = m >= 3 ? 8 : m >= 2 ? 5 : 3;
 
   const startLoop = useCallback(() => {
@@ -61,7 +61,6 @@ export function ParticleEffect({
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
 
-        // Save trail position (just previous pos, not array)
         if (m >= 3) {
           p.trailX = p.x;
           p.trailY = p.y;
@@ -73,7 +72,7 @@ export function ParticleEffect({
         p.life -= dt / p.maxLife;
 
         if (p.life <= 0) {
-          // Swap-remove: move last element here
+
           particles[i] = particles[particles.length - 1];
           particles.pop();
           continue;
@@ -82,7 +81,6 @@ export function ParticleEffect({
         aliveCount++;
         ctx.globalAlpha = p.life;
 
-        // Draw trail (simplified: single line from prev pos)
         if (m >= 3) {
           ctx.strokeStyle = p.color;
           ctx.lineWidth = p.size * 0.4;
@@ -119,7 +117,7 @@ export function ParticleEffect({
       if (aliveCount > 0) {
         rafRef.current = requestAnimationFrame(loop);
       } else {
-        // Stop loop when all particles are dead
+
         runningRef.current = false;
       }
     };
@@ -134,7 +132,6 @@ export function ParticleEffect({
     const cx = canvas.width / 2;
     const cy = canvas.height / 2;
 
-    // Regular burst
     for (let i = 0; i < totalCount; i++) {
       const angle = (Math.PI * 2 * i) / totalCount + (Math.random() - 0.5) * 0.5;
       const speed = 2 + Math.random() * 4;
@@ -151,7 +148,6 @@ export function ParticleEffect({
       });
     }
 
-    // x4: Ring explosion — 24 uniform particles
     if (m >= 4) {
       const ringCount = 24;
       for (let i = 0; i < ringCount; i++) {
@@ -176,7 +172,6 @@ export function ParticleEffect({
     if (trigger > 0) spawn();
   }, [trigger, spawn]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => cancelAnimationFrame(rafRef.current);
   }, []);

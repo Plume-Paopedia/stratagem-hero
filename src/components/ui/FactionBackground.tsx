@@ -14,7 +14,6 @@ function drawTerminids(ctx: CanvasRenderingContext2D, w: number, h: number, time
   const { r, g, b } = hexToRgb(FACTIONS.terminids.colors.primary);
   const accentRgb = hexToRgb(FACTIONS.terminids.colors.accent);
 
-  // Organic pulsing hexagonal grid
   const hexSize = 60;
   const pulse = Math.sin(time * 0.8) * 0.3 + 0.7;
 
@@ -38,7 +37,6 @@ function drawTerminids(ctx: CanvasRenderingContext2D, w: number, h: number, time
     }
   }
 
-  // Ambient blobs (organic feel)
   for (let i = 0; i < 5; i++) {
     const bx = (w * (0.15 + i * 0.18)) + Math.sin(time * 0.3 + i * 2) * 30;
     const by = (h * 0.5) + Math.cos(time * 0.4 + i * 1.5) * 40;
@@ -54,7 +52,6 @@ function drawTerminids(ctx: CanvasRenderingContext2D, w: number, h: number, time
 function drawAutomatons(ctx: CanvasRenderingContext2D, w: number, h: number, time: number) {
   const { r, g, b } = hexToRgb(FACTIONS.automatons.colors.primary);
 
-  // Industrial grid lines
   const gridSpacing = 80;
   const flicker = Math.sin(time * 2) * 0.02;
   ctx.strokeStyle = `rgba(${r},${g},${b},${0.035 + flicker})`;
@@ -73,7 +70,6 @@ function drawAutomatons(ctx: CanvasRenderingContext2D, w: number, h: number, tim
     ctx.stroke();
   }
 
-  // Diagonal hatching
   ctx.strokeStyle = `rgba(${r},${g},${b},0.02)`;
   for (let d = -h; d < w + h; d += 40) {
     ctx.beginPath();
@@ -82,7 +78,6 @@ function drawAutomatons(ctx: CanvasRenderingContext2D, w: number, h: number, tim
     ctx.stroke();
   }
 
-  // Spark bursts at random grid intersections
   const sparkSeed = Math.floor(time * 2) % 20;
   for (let i = 0; i < 3; i++) {
     const si = (sparkSeed + i * 7) % 20;
@@ -98,7 +93,6 @@ function drawAutomatons(ctx: CanvasRenderingContext2D, w: number, h: number, tim
     }
   }
 
-  // Red vignette
   const vignette = ctx.createRadialGradient(w / 2, h / 2, w * 0.2, w / 2, h / 2, w * 0.7);
   vignette.addColorStop(0, 'transparent');
   vignette.addColorStop(1, `rgba(${r},0,0,0.04)`);
@@ -112,7 +106,6 @@ function drawIlluminate(ctx: CanvasRenderingContext2D, w: number, h: number, tim
   const cx = w / 2;
   const cy = h / 2;
 
-  // Rotating concentric rings
   ctx.save();
   ctx.translate(cx, cy);
 
@@ -133,7 +126,6 @@ function drawIlluminate(ctx: CanvasRenderingContext2D, w: number, h: number, tim
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Geometric nodes on ring
     const nodeCount = 3 + ring;
     for (let n = 0; n < nodeCount; n++) {
       const angle = (Math.PI * 2 * n) / nodeCount;
@@ -148,7 +140,6 @@ function drawIlluminate(ctx: CanvasRenderingContext2D, w: number, h: number, tim
 
   ctx.restore();
 
-  // Central glow
   const pulse = Math.sin(time * 1.2) * 0.3 + 0.7;
   const centralGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 120 * pulse);
   centralGlow.addColorStop(0, `rgba(${r},${g},${b},0.04)`);
@@ -176,9 +167,8 @@ export function FactionBackground() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Half-resolution + 30fps throttle for performance
     const SCALE = 0.5;
-    const FRAME_INTERVAL = 1000 / 30; // 30fps
+    const FRAME_INTERVAL = 1000 / 30;
     const resize = () => {
       canvas.width = Math.floor(window.innerWidth * SCALE);
       canvas.height = Math.floor(window.innerHeight * SCALE);

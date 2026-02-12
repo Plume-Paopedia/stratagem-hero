@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 import type { GameMode, LeaderboardEntry, Leaderboards } from '../types';
-import { loadFromStorage, saveToStorage } from '../utils/storage';
+import { loadVersioned, saveVersioned } from '../utils/storage';
 
 const STORAGE_KEY = 'hd2-leaderboard';
+const SCHEMA_VERSION = 1;
 const MAX_ENTRIES = 10;
 
 interface LeaderboardStore {
@@ -14,10 +15,15 @@ interface LeaderboardStore {
 }
 
 export const useLeaderboardStore = create<LeaderboardStore>((set, get) => {
-  const saved = loadFromStorage<{ boards: Leaderboards }>(STORAGE_KEY, { boards: {} });
+  const saved = loadVersioned<{ boards: Leaderboards }>(
+    STORAGE_KEY,
+    SCHEMA_VERSION,
+    (raw) => ({ boards: {}, ...(raw as Partial<{ boards: Leaderboards }>) }),
+    { boards: {} },
+  );
 
   const persist = () => {
-    saveToStorage(STORAGE_KEY, { boards: get().boards });
+    saveVersioned(STORAGE_KEY, SCHEMA_VERSION, { boards: get().boards });
   };
 
   return {
@@ -34,7 +40,7 @@ export const useLeaderboardStore = create<LeaderboardStore>((set, get) => {
       if (mode === 'free-practice' || score <= 0) return null;
       const entries = get().boards[mode] ?? [];
       if (entries.length < MAX_ENTRIES) {
-        // Find insertion point
+
         const rank = entries.findIndex((e) => score > e.score);
         return rank === -1 ? entries.length + 1 : rank + 1;
       }
@@ -49,7 +55,7 @@ export const useLeaderboardStore = create<LeaderboardStore>((set, get) => {
       set((state) => {
         const current = [...(state.boards[mode] ?? [])];
         current.push(entry);
-        // Sort descending by score, then by date (newer first for ties)
+
         current.sort((a, b) => b.score - a.score || b.date - a.date);
         const trimmed = current.slice(0, MAX_ENTRIES);
         return { boards: { ...state.boards, [mode]: trimmed } };

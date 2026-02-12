@@ -43,7 +43,6 @@ export function AchievementsScreen({ onClose }: AchievementsScreenProps) {
 
   return (
     <div className="h-full flex flex-col gap-4 p-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="font-display text-xl text-hd-yellow uppercase tracking-wider">
@@ -68,7 +67,6 @@ export function AchievementsScreen({ onClose }: AchievementsScreenProps) {
         </Button>
       </div>
 
-      {/* Filters */}
       <div className="flex items-center gap-2 flex-wrap">
         <FilterButton
           active={filter === 'all'}
@@ -97,7 +95,6 @@ export function AchievementsScreen({ onClose }: AchievementsScreenProps) {
         </div>
       </div>
 
-      {/* Grid */}
       <div className="flex-1 overflow-y-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {displayedAchievements.map(def => (

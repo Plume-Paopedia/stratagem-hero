@@ -31,7 +31,6 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
   const bestScores = useStatsStore((s) => s.bestScores);
   const customConfig = useCustomModeStore((s) => s.activeConfig);
 
-  // Game state
   const [state, setState] = useState<'countdown' | 'playing' | 'game-over'>('countdown');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [inputIndex, setInputIndex] = useState(0);
@@ -56,12 +55,11 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
   const currentStratagem = queue[currentIndex] ?? null;
   const isPlaying = state === 'playing';
 
-  // Timer setup based on mode
   const timerInitialMs = useMemo(() => {
     if (mode === 'custom' && customConfig) {
       if (customConfig.timerType === 'countdown') return customConfig.timerDuration * 1000;
       if (customConfig.timerType === 'survival') return customConfig.timerDuration * 1000;
-      return 0; // 'none' or 'countup'
+      return 0;
     }
     switch (mode) {
       case 'time-attack': return timeAttackDuration * 1000;
@@ -117,7 +115,6 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
       const newMult = getStreakMultiplier(newStreak);
       const scoreBreak = calculateScore(timeMs, strat.sequence.length, newMult);
 
-      // Score multipliers: boss x2, custom mode scoreMultiplier
       const bossMultiplier = isBoss ? 2 : 1;
       const customScoreMult = mode === 'custom' && customConfig ? customConfig.scoreMultiplier : 1;
       setScore((s) => s + Math.round(scoreBreak.total * bossMultiplier * customScoreMult));
@@ -138,21 +135,18 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
       attemptStartRef.current = performance.now();
       attemptErrorsRef.current = 0;
 
-      // Track consecutive fast completions
       if (timeMs < 1000) {
         consecutiveFastRef.current += 1;
       } else {
         consecutiveFastRef.current = 0;
       }
 
-      // Live achievement checks
       checkLiveAchievement('combo-complete', {
         timeMs,
         consecutiveFastCount: consecutiveFastRef.current,
       });
       checkLiveAchievement('streak', { streak: newStreak, multiplier: newMult });
 
-      // Trigger effects
       effects.fireSuccess(strat.name, newMult);
       audio.successJingle();
 
@@ -164,7 +158,6 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
         effects.fireStreakUp();
       }
 
-      // Advance to next
       const nextIndex = currentIndex + 1;
       const loopingModes: GameMode[] = ['survival', 'time-attack', 'endless', 'boss-rush'];
       const customLoops = mode === 'custom' && customConfig
@@ -179,9 +172,8 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
         setCurrentIndex(nextIndex);
       }
 
-      // Boss Rush: detect boss every 10 combos, speed up every 5
       if (mode === 'boss-rush') {
-        setIsBoss(newStreak % 10 === 9); // next combo will be boss
+        setIsBoss(newStreak % 10 === 9);
         if (newStreak % 5 === 0) {
           setSurvivalTimeLimit((t) => Math.max(3000, t - 200));
           resetTimer(Math.max(3000, survivalTimeLimit - 200));
@@ -190,7 +182,6 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
         }
       }
 
-      // Survival: speed up every 5
       if (mode === 'survival' && newStreak % 5 === 0) {
         setSurvivalTimeLimit((t) => Math.max(2000, t - 300));
         resetTimer(Math.max(2000, survivalTimeLimit - 300));
@@ -198,12 +189,10 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
         resetTimer(survivalTimeLimit);
       }
 
-      // Endless: reset timer to 10s on success
       if (mode === 'endless') {
         resetTimer(10000);
       }
 
-      // Custom survival: reset timer on success
       if (mode === 'custom' && customConfig?.timerType === 'survival') {
         resetTimer(customConfig.timerDuration * 1000);
       }
@@ -234,17 +223,14 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
 
       if (mode === 'survival' || mode === 'boss-rush') { endGame(); return; }
 
-      // Speed Run: +2s penalty
       if (mode === 'speed-run') {
         setPenaltyMs((p) => p + 2000);
       }
 
-      // Endless: -3s from timer
       if (mode === 'endless') {
         resetTimer(Math.max(0, timeMs - 3000));
       }
 
-      // Custom mode error behavior
       if (mode === 'custom' && customConfig) {
         switch (customConfig.errorBehavior) {
           case 'end-game':
@@ -263,7 +249,7 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
             }
             setPenaltyMs((p) => p + customConfig.timePenaltyMs);
             break;
-          // 'reset-streak' is already handled above (streak always resets on error)
+
         }
       }
 
@@ -280,7 +266,6 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
     onError: handleError,
   });
 
-  // Record stats on game over + check leaderboard + achievements
   useEffect(() => {
     if (state !== 'game-over') return;
     const duration = totalTimeRef.current;
@@ -300,7 +285,6 @@ export function useGameLogic({ mode, queue, effects }: UseGameLogicOptions) {
     };
     recordStats(sessionStats);
 
-    // Check achievements with updated global stats
     checkSessionAchievements(sessionStats, getStatsState.getState());
 
     if (qualifiesForLeaderboard(mode, score)) {

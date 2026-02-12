@@ -1,8 +1,3 @@
-/**
- * Helldivers 2 music player.
- * Plays official OST tracks with contextual switching and crossfade.
- * Uses HTML5 Audio — files loaded on demand from public/audio/.
- */
 
 export type TrackName = 'menu' | 'gameplay' | 'countdown' | 'gameover';
 
@@ -22,7 +17,6 @@ let currentTrack: TrackName | null = null;
 let volume = 0.3;
 let playing = false;
 
-// Preload cache — avoids re-creating Audio objects
 const cache = new Map<TrackName, HTMLAudioElement>();
 
 function getAudio(track: TrackName): HTMLAudioElement {
@@ -70,13 +64,11 @@ function fadeIn(audio: HTMLAudioElement, targetVol: number, durationMs: number) 
   }, stepMs);
 }
 
-// ── Public API (same signatures as old chiptune engine) ─────────────
-
 export function startMusic(vol: number) {
   volume = vol;
   if (playing) return;
   playing = true;
-  // Default to menu track
+
   if (!currentTrack) currentTrack = 'menu';
   const audio = getAudio(currentTrack);
   audio.volume = volume;
@@ -103,8 +95,6 @@ export function isMusicPlaying(): boolean {
   return playing;
 }
 
-// ── New: contextual track switching ─────────────────────────────────
-
 export function switchTrack(track: TrackName) {
   if (track === currentTrack) return;
   currentTrack = track;
@@ -115,7 +105,7 @@ export function switchTrack(track: TrackName) {
   next.currentTime = 0;
 
   if (currentAudio && !currentAudio.paused) {
-    // Crossfade: fade out current, fade in next
+
     const prev = currentAudio;
     fadeOut(prev, CROSSFADE_MS);
     fadeIn(next, volume, CROSSFADE_MS);

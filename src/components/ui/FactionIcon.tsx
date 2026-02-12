@@ -11,23 +11,18 @@ interface FactionIconProps {
 function TerminidPath() {
   return (
     <g>
-      {/* Bug body */}
       <ellipse cx="50" cy="55" rx="18" ry="22" fill="currentColor" opacity="0.9" />
       <ellipse cx="50" cy="30" rx="12" ry="14" fill="currentColor" />
-      {/* Mandibles */}
       <path d="M38 22 Q32 12 28 8" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round" />
       <path d="M62 22 Q68 12 72 8" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round" />
-      {/* Eyes */}
       <circle cx="44" cy="26" r="3" fill="black" />
       <circle cx="56" cy="26" r="3" fill="black" />
-      {/* Legs */}
       <path d="M34 42 L18 32" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
       <path d="M66 42 L82 32" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
       <path d="M32 52 L14 50" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
       <path d="M68 52 L86 50" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
       <path d="M34 64 L20 72" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
       <path d="M66 64 L80 72" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-      {/* Tail */}
       <path d="M50 77 L50 90 L46 95" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" />
     </g>
   );
@@ -36,34 +31,24 @@ function TerminidPath() {
 function AutomatonPath() {
   return (
     <g>
-      {/* Head */}
       <rect x="30" y="10" width="40" height="32" rx="3" fill="currentColor" opacity="0.9" />
-      {/* Eye slits */}
       <rect x="36" y="20" width="10" height="4" rx="1" fill="black" />
       <rect x="54" y="20" width="10" height="4" rx="1" fill="black" />
-      {/* Eye glow */}
       <rect x="37" y="21" width="8" height="2" rx="0.5" fill="#ff0000" opacity="0.8" />
       <rect x="55" y="21" width="8" height="2" rx="0.5" fill="#ff0000" opacity="0.8" />
-      {/* Jaw */}
       <rect x="35" y="32" width="30" height="6" rx="1" fill="currentColor" opacity="0.7" />
       <line x1="40" y1="33" x2="40" y2="37" stroke="black" strokeWidth="1" />
       <line x1="46" y1="33" x2="46" y2="37" stroke="black" strokeWidth="1" />
       <line x1="52" y1="33" x2="52" y2="37" stroke="black" strokeWidth="1" />
       <line x1="58" y1="33" x2="58" y2="37" stroke="black" strokeWidth="1" />
-      {/* Antenna */}
       <line x1="50" y1="10" x2="50" y2="2" stroke="currentColor" strokeWidth="2" />
       <circle cx="50" cy="2" r="2.5" fill="currentColor" />
-      {/* Neck */}
       <rect x="44" y="38" width="12" height="6" fill="currentColor" opacity="0.6" />
-      {/* Torso */}
       <rect x="28" y="44" width="44" height="30" rx="2" fill="currentColor" opacity="0.8" />
-      {/* Chest plate details */}
       <line x1="50" y1="48" x2="50" y2="70" stroke="black" strokeWidth="1.5" />
       <line x1="34" y1="56" x2="66" y2="56" stroke="black" strokeWidth="1" />
-      {/* Arms */}
       <rect x="18" y="46" width="10" height="22" rx="2" fill="currentColor" opacity="0.7" />
       <rect x="72" y="46" width="10" height="22" rx="2" fill="currentColor" opacity="0.7" />
-      {/* Legs */}
       <rect x="34" y="74" width="12" height="20" rx="2" fill="currentColor" opacity="0.7" />
       <rect x="54" y="74" width="12" height="20" rx="2" fill="currentColor" opacity="0.7" />
     </g>
@@ -73,22 +58,15 @@ function AutomatonPath() {
 function IlluminatePath() {
   return (
     <g>
-      {/* Outer triangle */}
       <polygon points="50,5 90,80 10,80" fill="none" stroke="currentColor" strokeWidth="2.5" opacity="0.7" />
-      {/* Inner triangle (inverted) */}
       <polygon points="50,65 30,30 70,30" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.5" />
-      {/* Eye outer */}
       <ellipse cx="50" cy="45" rx="18" ry="12" fill="none" stroke="currentColor" strokeWidth="2" />
-      {/* Eye inner */}
       <ellipse cx="50" cy="45" rx="10" ry="7" fill="currentColor" opacity="0.3" />
-      {/* Pupil */}
       <circle cx="50" cy="45" r="5" fill="currentColor" opacity="0.9" />
       <circle cx="50" cy="45" r="2" fill="black" />
-      {/* Rays */}
       <line x1="50" y1="5" x2="50" y2="25" stroke="currentColor" strokeWidth="1" opacity="0.4" />
       <line x1="25" y1="68" x2="35" y2="55" stroke="currentColor" strokeWidth="1" opacity="0.4" />
       <line x1="75" y1="68" x2="65" y2="55" stroke="currentColor" strokeWidth="1" opacity="0.4" />
-      {/* Concentric rings */}
       <circle cx="50" cy="45" r="24" fill="none" stroke="currentColor" strokeWidth="0.8" opacity="0.3" />
       <circle cx="50" cy="45" r="30" fill="none" stroke="currentColor" strokeWidth="0.5" opacity="0.2" strokeDasharray="3 3" />
     </g>

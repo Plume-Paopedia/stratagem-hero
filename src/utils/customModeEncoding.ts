@@ -14,7 +14,7 @@ export function decodeConfig(encoded: string): CustomModeConfig | null {
   try {
     const json = atob(encoded);
     const parsed = JSON.parse(json);
-    // Validate required fields
+
     if (typeof parsed.name !== 'string') return null;
     if (!['none', 'countdown', 'countup', 'survival'].includes(parsed.timerType)) return null;
     return { ...defaultConfig, ...parsed };

@@ -35,10 +35,6 @@ interface Lightning {
   hueIdx: number;
 }
 
-/**
- * Fire / lightning / energy border effect based on streak multiplier.
- * OPTIMIZED: object pooling, capped particles, pre-computed colors, half-res canvas.
- */
 export function StreakFire({ multiplier, active }: StreakFireProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef(0);
@@ -55,7 +51,6 @@ export function StreakFire({ multiplier, active }: StreakFireProps) {
     }
     const canvas = canvasEl;
 
-    // Half-resolution rendering for performance
     const SCALE = 0.5;
     let w = 0, h = 0;
     const resize = () => {
@@ -68,12 +63,10 @@ export function StreakFire({ multiplier, active }: StreakFireProps) {
     window.addEventListener('resize', resize);
     const ctx = canvas.getContext('2d')!;
 
-    // Pre-compute faction colors as RGB tuples
     const factionTheme = faction ? FACTIONS[faction] : null;
     const hues = factionTheme ? factionTheme.particleHues : [30, 15, 0];
     const hueRgb = hues.map((h) => hslToRgb(h, 1, 0.5));
 
-    // Particle pool with hard cap
     const MAX_EMBERS = multiplier === 2 ? 120 : multiplier === 3 ? 200 : 300;
     const pool: Ember[] = [];
     for (let i = 0; i < MAX_EMBERS; i++) {
@@ -83,7 +76,6 @@ export function StreakFire({ multiplier, active }: StreakFireProps) {
 
     const lightnings: Lightning[] = [];
 
-    // Time-based spawning instead of per-frame
     const spawnsPerSec = multiplier === 2 ? 60 : multiplier === 3 ? 150 : 300;
     const topSpawnsPerSec = multiplier >= 4 ? 100 : 0;
     let spawnAccum = 0;
@@ -93,7 +85,7 @@ export function StreakFire({ multiplier, active }: StreakFireProps) {
 
     function spawnEmber(fromTop: boolean) {
       if (aliveCount >= MAX_EMBERS) return;
-      // Find a dead ember in pool
+
       let e: Ember | null = null;
       for (let i = 0; i < pool.length; i++) {
         if (!pool[i].alive) { e = pool[i]; break; }
@@ -164,13 +156,12 @@ export function StreakFire({ multiplier, active }: StreakFireProps) {
     let lastTime = performance.now();
 
     const loop = (now: number) => {
-      const dt = Math.min((now - lastTime) / 1000, 0.05); // Cap dt to prevent spiral
+      const dt = Math.min((now - lastTime) / 1000, 0.05);
       lastTime = now;
       time += dt;
 
       ctx.clearRect(0, 0, w, h);
 
-      // Time-based spawning
       spawnAccum += spawnsPerSec * dt;
       while (spawnAccum >= 1) { spawnEmber(false); spawnAccum--; }
 
@@ -179,18 +170,15 @@ export function StreakFire({ multiplier, active }: StreakFireProps) {
         while (topSpawnAccum >= 1) { spawnEmber(true); topSpawnAccum--; }
       }
 
-      // Flare bursts every ~0.5s at x3+
       if (multiplier >= 3 && time - lastFlare > 0.5) {
         lastFlare = time;
         spawnFlare();
       }
 
-      // Lightning at x4
       if (multiplier >= 4 && lightnings.length < 3 && Math.random() < 0.02) {
         spawnLightning();
       }
 
-      // Update and draw embers — use fillRect for speed (no arc)
       aliveCount = 0;
       for (let i = 0; i < pool.length; i++) {
         const e = pool[i];
@@ -209,7 +197,6 @@ export function StreakFire({ multiplier, active }: StreakFireProps) {
         const s = e.size;
         ctx.fillRect(e.x - s * 0.5, e.y - s * 0.5, s, s);
 
-        // Glow only for larger embers at x3+ (skip small ones for perf)
         if (multiplier >= 3 && s > 1.5 * SCALE) {
           ctx.fillStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${e.life * 0.1})`;
           const gs = s * 3;
@@ -217,7 +204,6 @@ export function StreakFire({ multiplier, active }: StreakFireProps) {
         }
       }
 
-      // Draw lightning
       for (let i = lightnings.length - 1; i >= 0; i--) {
         const l = lightnings[i];
         l.life -= dt * 5;
@@ -238,20 +224,17 @@ export function StreakFire({ multiplier, active }: StreakFireProps) {
         ctx.stroke();
       }
 
-      // Edge glows
       const intensity = multiplier === 2 ? 0.06 : multiplier === 3 ? 0.14 : 0.25;
       const edgeW = (multiplier === 2 ? 60 : multiplier === 3 ? 100 : 120) * SCALE;
       const pulse = Math.sin(time * 3) * 0.03;
       const rgb0 = hueRgb[0];
 
-      // Bottom
       const grad = ctx.createLinearGradient(0, h, 0, h - edgeW);
       grad.addColorStop(0, `rgba(${rgb0[0]},${rgb0[1]},${rgb0[2]},${intensity + pulse})`);
       grad.addColorStop(1, 'transparent');
       ctx.fillStyle = grad;
       ctx.fillRect(0, h - edgeW, w, edgeW);
 
-      // Sides
       const sideI = multiplier >= 4 ? intensity * 0.7 : intensity * 0.4;
       const sideW = (multiplier >= 4 ? 80 : 50) * SCALE;
 
@@ -267,7 +250,6 @@ export function StreakFire({ multiplier, active }: StreakFireProps) {
       ctx.fillStyle = gradR;
       ctx.fillRect(w - sideW, 0, sideW, h);
 
-      // Top edge at x4
       if (multiplier >= 4) {
         const topW = edgeW * 0.6;
         const gradT = ctx.createLinearGradient(0, 0, 0, topW);
@@ -277,9 +259,8 @@ export function StreakFire({ multiplier, active }: StreakFireProps) {
         ctx.fillRect(0, 0, w, topW);
       }
 
-      // Flame tongues at x3+ (reduced iteration)
       if (multiplier >= 3) {
-        const step = 60; // wider spacing for perf
+        const step = 60;
         ctx.fillStyle = `rgba(${rgb0[0]},${rgb0[1]},${rgb0[2]},0.06)`;
         for (let fx = 0; fx < w; fx += step) {
           const flameH = (20 + Math.sin(time * 2 + fx * 0.05) * 15 + Math.sin(time * 5 + fx * 0.1) * 8) * SCALE;

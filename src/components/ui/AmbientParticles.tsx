@@ -9,10 +9,9 @@ interface FloatingParticle {
   vy: number;
   size: number;
   opacity: number;
-  hue: number; // 0 = white, 45 = yellow
+  hue: number;
 }
 
-/** Convert HSL hue to an approximate RGB for canvas rendering */
 function hueToRgb(hue: number): [number, number, number] {
   const h = ((hue % 360) + 360) % 360 / 60;
   const x = 1 - Math.abs((h % 2) - 1);
@@ -26,11 +25,6 @@ function hueToRgb(hue: number): [number, number, number] {
   return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }
 
-/**
- * Full-screen ambient floating particles.
- * Tiny glowing specks drift slowly across the screen like embers / space dust.
- * Shifts hues to match the active faction.
- */
 export function AmbientParticles() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<FloatingParticle[]>([]);
@@ -50,7 +44,6 @@ export function AmbientParticles() {
     resize();
     window.addEventListener('resize', resize);
 
-    // Spawn particles
     const count = 60;
     particlesRef.current = Array.from({ length: count }, () => ({
       x: Math.random() * canvas.width,
@@ -98,7 +91,6 @@ export function AmbientParticles() {
         }
         ctx.fill();
 
-        // Glow for colored particles
         if (p.hue !== 0 && p.size > 1.5) {
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2);

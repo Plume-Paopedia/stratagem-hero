@@ -12,7 +12,7 @@ interface ArcadeInitialEntryProps {
 }
 
 export function ArcadeInitialEntry({ score, rank, onConfirm, onCancel }: ArcadeInitialEntryProps) {
-  const [slots, setSlots] = useState([0, 0, 0]); // indices into ALPHABET
+  const [slots, setSlots] = useState([0, 0, 0]);
   const [activeSlot, setActiveSlot] = useState(0);
   const [confirmed, setConfirmed] = useState(false);
   const [direction, setDirection] = useState<'up' | 'down'>('up');
@@ -51,7 +51,7 @@ export function ArcadeInitialEntry({ score, rank, onConfirm, onCancel }: ArcadeI
       setActiveSlot((s) => s + 1);
       audio.menuClick();
     } else {
-      // On last slot, right = confirm
+
       doConfirm();
     }
   }, [activeSlot, audio]);
@@ -68,7 +68,7 @@ export function ArcadeInitialEntry({ score, rank, onConfirm, onCancel }: ArcadeI
     if (confirmed) return;
 
     const handler = (e: KeyboardEvent) => {
-      // Throttle rapid inputs (allow hold-to-scroll at ~8/sec)
+
       const now = performance.now();
       if (e.repeat && now - lastKeyTime.current < 100) return;
       lastKeyTime.current = now;
@@ -97,7 +97,6 @@ export function ArcadeInitialEntry({ score, rank, onConfirm, onCancel }: ArcadeI
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-hd-black/85 backdrop-blur-sm" />
 
       <motion.div
@@ -106,7 +105,6 @@ export function ArcadeInitialEntry({ score, rank, onConfirm, onCancel }: ArcadeI
         animate={{ scale: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 200, damping: 20 }}
       >
-        {/* Title */}
         <div className="text-center">
           <h2 className="font-display text-2xl text-hd-red uppercase tracking-[0.3em]">
             Entrez vos Initiales
@@ -116,13 +114,11 @@ export function ArcadeInitialEntry({ score, rank, onConfirm, onCancel }: ArcadeI
           </p>
         </div>
 
-        {/* Letter slots */}
         <div className="flex gap-4">
           {slots.map((charIdx, slotIdx) => {
             const isActive = slotIdx === activeSlot && !confirmed;
             return (
               <div key={slotIdx} className="flex flex-col items-center gap-1">
-                {/* Up arrow hint */}
                 <motion.div
                   className={`text-xs ${isActive ? 'text-hd-yellow' : 'text-transparent'}`}
                   animate={isActive ? { opacity: [0.3, 0.8, 0.3] } : { opacity: 0 }}
@@ -131,7 +127,6 @@ export function ArcadeInitialEntry({ score, rank, onConfirm, onCancel }: ArcadeI
                   ▲
                 </motion.div>
 
-                {/* Letter box */}
                 <motion.div
                   className={`w-16 h-20 flex items-center justify-center rounded border-2 ${
                     isActive
@@ -161,7 +156,6 @@ export function ArcadeInitialEntry({ score, rank, onConfirm, onCancel }: ArcadeI
                   </AnimatePresence>
                 </motion.div>
 
-                {/* Down arrow hint */}
                 <motion.div
                   className={`text-xs ${isActive ? 'text-hd-yellow' : 'text-transparent'}`}
                   animate={isActive ? { opacity: [0.3, 0.8, 0.3] } : { opacity: 0 }}
@@ -174,7 +168,6 @@ export function ArcadeInitialEntry({ score, rank, onConfirm, onCancel }: ArcadeI
           })}
         </div>
 
-        {/* Score and rank */}
         <div className="text-center">
           <div className="font-display text-3xl text-hd-yellow">
             {score.toLocaleString()}
@@ -184,7 +177,6 @@ export function ArcadeInitialEntry({ score, rank, onConfirm, onCancel }: ArcadeI
           </div>
         </div>
 
-        {/* Controls hint */}
         <div className="flex flex-wrap justify-center gap-3 text-xs text-hd-gray/50 font-heading uppercase tracking-wider">
           <span>↑↓ Lettre</span>
           <span>←→ Case</span>
@@ -192,7 +184,6 @@ export function ArcadeInitialEntry({ score, rank, onConfirm, onCancel }: ArcadeI
           <span>Echap = Passer</span>
         </div>
 
-        {/* Confirmed flash */}
         <AnimatePresence>
           {confirmed && (
             <motion.div

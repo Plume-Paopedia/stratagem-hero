@@ -51,7 +51,6 @@ export function CustomModeBuilder({ onStart, onClose, initialConfig }: CustomMod
         </div>
       </div>
 
-      {/* Mode name */}
       <input
         type="text"
         value={config.name}
@@ -61,7 +60,6 @@ export function CustomModeBuilder({ onStart, onClose, initialConfig }: CustomMod
         placeholder="Nom du mode..."
       />
 
-      {/* Tabs */}
       <div className="flex gap-1">
         {(['timer', 'rules', 'queue', 'presets'] as const).map((t) => (
           <button
@@ -76,7 +74,6 @@ export function CustomModeBuilder({ onStart, onClose, initialConfig }: CustomMod
         ))}
       </div>
 
-      {/* Tab content */}
       <div className="flex-1 overflow-y-auto">
         {tab === 'timer' && (
           <div className="flex flex-col gap-4">
@@ -225,7 +222,6 @@ export function CustomModeBuilder({ onStart, onClose, initialConfig }: CustomMod
         )}
       </div>
 
-      {/* Actions */}
       <div className="flex gap-2 border-t border-hd-border pt-3">
         <Button variant="primary" onClick={() => onStart(config)}>
           Jouer

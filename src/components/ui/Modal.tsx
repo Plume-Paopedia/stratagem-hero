@@ -1,5 +1,6 @@
-import { type ReactNode, useEffect } from 'react';
+import { type ReactNode, useEffect, useRef, useId } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 interface ModalProps {
   open: boolean;
@@ -9,6 +10,11 @@ interface ModalProps {
 }
 
 export function Modal({ open, onClose, title, children }: ModalProps) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+
+  useFocusTrap(panelRef, open);
+
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
@@ -34,6 +40,10 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
             role="presentation"
           />
           <motion.div
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={title ? titleId : undefined}
             className="relative z-10 bg-hd-panel border border-hd-border rounded-lg
                        max-w-lg w-full mx-4 p-6 shadow-2xl"
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -42,7 +52,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
             transition={{ duration: 0.2 }}
           >
             {title && (
-              <h2 className="font-display text-xl text-hd-yellow mb-4 uppercase tracking-wider">
+              <h2 id={titleId} className="font-display text-xl text-hd-yellow mb-4 uppercase tracking-wider">
                 {title}
               </h2>
             )}

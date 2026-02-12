@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { motion } from 'framer-motion';
 import type { Direction, InputResult } from '../../types';
 
@@ -21,7 +22,7 @@ const stateColors: Record<InputResult, { fill: string; stroke: string; glow: str
   wrong: { fill: '#ff3333', stroke: '#ff3333', glow: 'rgba(255,51,51,0.5)' },
 };
 
-export function DirectionArrow({
+export const DirectionArrow = memo(function DirectionArrow({
   direction,
   state,
   size = 40,
@@ -75,4 +76,4 @@ export function DirectionArrow({
       )}
     </motion.div>
   );
-}
+});

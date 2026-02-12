@@ -2,7 +2,6 @@ import { useCallback } from 'react';
 import { useSettingsStore } from '../stores/settingsStore';
 import type { Direction } from '../types';
 
-/** Maps a keyboard event code to a direction, or null */
 export function useKeyBindings() {
   const keyBindings = useSettingsStore((s) => s.keyBindings);
 

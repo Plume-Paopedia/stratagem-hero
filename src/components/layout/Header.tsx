@@ -37,7 +37,6 @@ export function Header({ onStats, onSettings, onLeaderboard, onAchievements, onH
       </motion.div>
 
       <div className="flex gap-2 items-center">
-        {/* Music toggle */}
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={toggleMusic}

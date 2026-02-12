@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 import type { UserSettings, KeyBindings } from '../types';
-import { loadFromStorage, saveToStorage } from '../utils/storage';
+import { loadVersioned, saveVersioned } from '../utils/storage';
 import { startMusic, stopMusic, setMusicVolume } from '../utils/music';
 
 const STORAGE_KEY = 'hd2-settings';
+const SCHEMA_VERSION = 1;
 
 const defaultKeyBindings: KeyBindings = {
   up: ['ArrowUp', 'KeyW'],
@@ -48,7 +49,7 @@ interface SettingsState extends UserSettings {
 }
 
 function persistAll(state: UserSettings) {
-  saveToStorage(STORAGE_KEY, {
+  saveVersioned(STORAGE_KEY, SCHEMA_VERSION, {
     masterVolume: state.masterVolume,
     sfxEnabled: state.sfxEnabled,
     musicEnabled: state.musicEnabled,
@@ -65,7 +66,12 @@ function persistAll(state: UserSettings) {
 }
 
 export const useSettingsStore = create<SettingsState>((set, get) => {
-  const saved = loadFromStorage<UserSettings>(STORAGE_KEY, defaultSettings);
+  const saved = loadVersioned<UserSettings>(
+    STORAGE_KEY,
+    SCHEMA_VERSION,
+    (raw) => ({ ...defaultSettings, ...(raw as Partial<UserSettings>) }),
+    defaultSettings,
+  );
   const merged = { ...defaultSettings, ...saved };
 
   const persist = (partial: Partial<UserSettings>) => {
@@ -128,7 +134,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
 
     resetToDefaults: () => {
       stopMusic();
-      saveToStorage(STORAGE_KEY, defaultSettings);
+      saveVersioned(STORAGE_KEY, SCHEMA_VERSION, defaultSettings);
       set(defaultSettings);
     },
   };

@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 import type { CustomModeConfig, CustomModePreset } from '../types/customMode';
-import { loadFromStorage, saveToStorage } from '../utils/storage';
+import { loadVersioned, saveVersioned } from '../utils/storage';
 
 const STORAGE_KEY = 'hd2-custom-modes';
+const SCHEMA_VERSION = 1;
 
 export const defaultConfig: CustomModeConfig = {
   name: 'My Custom Mode',
@@ -30,14 +31,16 @@ interface CustomModeStore extends CustomModeState {
 }
 
 export const useCustomModeStore = create<CustomModeStore>((set, get) => {
-  const saved = loadFromStorage<CustomModeState>(STORAGE_KEY, {
-    presets: [],
-    activeConfig: null,
-  });
+  const saved = loadVersioned<CustomModeState>(
+    STORAGE_KEY,
+    SCHEMA_VERSION,
+    (raw) => ({ presets: [], activeConfig: null, ...(raw as Partial<CustomModeState>) }),
+    { presets: [], activeConfig: null },
+  );
 
   const persist = () => {
     const s = get();
-    saveToStorage<CustomModeState>(STORAGE_KEY, {
+    saveVersioned<CustomModeState>(STORAGE_KEY, SCHEMA_VERSION, {
       presets: s.presets,
       activeConfig: s.activeConfig,
     });

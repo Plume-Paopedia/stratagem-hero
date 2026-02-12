@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 import type { GlobalStats, SessionStats, StratagemStats, Direction, GameMode } from '../types';
-import { loadFromStorage, saveToStorage } from '../utils/storage';
+import { loadVersioned, saveVersioned } from '../utils/storage';
 
 const STORAGE_KEY = 'hd2-stats';
+const SCHEMA_VERSION = 1;
 
 const defaultStats: GlobalStats = {
   totalSessions: 0,
@@ -24,16 +25,21 @@ interface StatsStore extends GlobalStats {
 }
 
 export const useStatsStore = create<StatsStore>((set, get) => {
-  const saved = loadFromStorage<GlobalStats>(STORAGE_KEY, defaultStats);
+  const saved = loadVersioned<GlobalStats>(
+    STORAGE_KEY,
+    SCHEMA_VERSION,
+    (raw) => ({ ...defaultStats, ...(raw as Partial<GlobalStats>) }),
+    defaultStats,
+  );
 
   const persist = () => {
     const s = get();
-    saveToStorage<GlobalStats>(STORAGE_KEY, {
+    saveVersioned<GlobalStats>(STORAGE_KEY, SCHEMA_VERSION, {
       totalSessions: s.totalSessions,
       totalPlayTimeMs: s.totalPlayTimeMs,
       totalStratagemsCompleted: s.totalStratagemsCompleted,
       totalErrors: s.totalErrors,
-      sessions: s.sessions.slice(-100), // Keep last 100 sessions
+      sessions: s.sessions.slice(-100),
       stratagemStats: s.stratagemStats,
       bestScores: s.bestScores,
       dailyChallengeScores: s.dailyChallengeScores,
@@ -111,7 +117,7 @@ export const useStatsStore = create<StatsStore>((set, get) => {
     getStratagemStats: (id) => get().stratagemStats[id],
 
     clearAllStats: () => {
-      saveToStorage(STORAGE_KEY, defaultStats);
+      saveVersioned(STORAGE_KEY, SCHEMA_VERSION, defaultStats);
       set(defaultStats);
     },
   };

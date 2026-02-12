@@ -31,7 +31,6 @@ export function Countdown({ onComplete }: CountdownProps) {
 
   return (
     <div className="fixed inset-0 z-30 flex items-center justify-center bg-hd-black/90">
-      {/* Orbital targeting rings */}
       <div className="absolute">
         <motion.div
           className="w-64 h-64 rounded-full border"
@@ -52,7 +51,6 @@ export function Countdown({ onComplete }: CountdownProps) {
           transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
         />
 
-        {/* Faction icon at center */}
         {faction && (
           <div className="absolute inset-0 flex items-center justify-center">
             <motion.div
@@ -64,7 +62,6 @@ export function Countdown({ onComplete }: CountdownProps) {
           </div>
         )}
 
-        {/* Crosshairs */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-full h-[1px]" style={{ backgroundColor: `${ringColor}1a` }} />
         </div>
@@ -72,7 +69,6 @@ export function Countdown({ onComplete }: CountdownProps) {
           <div className="h-full w-[1px]" style={{ backgroundColor: `${ringColor}1a` }} />
         </div>
 
-        {/* Corner ticks on ring */}
         {[0, 90, 180, 270].map((deg) => (
           <motion.div
             key={deg}
@@ -88,7 +84,6 @@ export function Countdown({ onComplete }: CountdownProps) {
         ))}
       </div>
 
-      {/* Status text at top */}
       <motion.div
         className="absolute top-[20%] font-heading text-sm uppercase tracking-[0.5em]"
         style={{ color: `${ringColor}66` }}
@@ -98,7 +93,6 @@ export function Countdown({ onComplete }: CountdownProps) {
         {factionTheme ? `Contact ${factionTheme.name}` : 'Verrouillage Orbital'} — Acquis
       </motion.div>
 
-      {/* Main countdown number */}
       <AnimatePresence mode="wait">
         <motion.div
           key={count}
@@ -113,7 +107,6 @@ export function Countdown({ onComplete }: CountdownProps) {
               <span className="font-display text-[8rem] leading-none text-hd-yellow drop-shadow-[0_0_60px_rgba(245,197,24,0.6)]">
                 {count}
               </span>
-              {/* Pulse ring per count */}
               <motion.div
                 className="absolute inset-0 flex items-center justify-center"
                 initial={{ scale: 0.5, opacity: 0.8 }}
@@ -132,7 +125,6 @@ export function Countdown({ onComplete }: CountdownProps) {
               <span className="font-display text-5xl md:text-7xl text-hd-yellow tracking-[0.3em] drop-shadow-[0_0_60px_rgba(245,197,24,0.8)]">
                 DEPLOIEMENT !
               </span>
-              {/* Explosion flash */}
               <motion.div
                 className="fixed inset-0 bg-hd-yellow/20"
                 initial={{ opacity: 1 }}
@@ -144,7 +136,6 @@ export function Countdown({ onComplete }: CountdownProps) {
         </motion.div>
       </AnimatePresence>
 
-      {/* Bottom status text */}
       <motion.div
         className="absolute bottom-[20%] font-heading text-xs uppercase tracking-[0.4em]"
         style={{ color: factionTheme ? `${ringColor}4d` : 'rgba(107,114,128,0.3)' }}

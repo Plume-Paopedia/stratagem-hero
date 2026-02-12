@@ -1,9 +1,7 @@
 import type { AchievementDef } from '../types/achievements';
 
 export const achievements: AchievementDef[] = [
-  // ══════════════════════════════════════════════════════════════
-  // VITESSE (8)
-  // ══════════════════════════════════════════════════════════════
+
   {
     id: 'lightning-reflexes',
     name: 'Reflexes Eclair',
@@ -73,9 +71,6 @@ export const achievements: AchievementDef[] = [
     icon: '\u{1F3AF}',
   },
 
-  // ══════════════════════════════════════════════════════════════
-  // SERIE (8)
-  // ══════════════════════════════════════════════════════════════
   {
     id: 'getting-warm',
     name: 'Ca Chauffe',
@@ -143,9 +138,6 @@ export const achievements: AchievementDef[] = [
     icon: '\u{1F396}\uFE0F',
   },
 
-  // ══════════════════════════════════════════════════════════════
-  // COMPLETION (10)
-  // ══════════════════════════════════════════════════════════════
   {
     id: 'first-deployment',
     name: 'Premier Deploiement',
@@ -237,9 +229,6 @@ export const achievements: AchievementDef[] = [
     maxProgress: 1000,
   },
 
-  // ══════════════════════════════════════════════════════════════
-  // SCORE (8)
-  // ══════════════════════════════════════════════════════════════
   {
     id: 'score-1k',
     name: 'Club des 1K',
@@ -306,9 +295,6 @@ export const achievements: AchievementDef[] = [
     icon: '\u{1F3AF}',
   },
 
-  // ══════════════════════════════════════════════════════════════
-  // COLLECTION (10)
-  // ══════════════════════════════════════════════════════════════
   {
     id: 'eagle-scout',
     name: 'Eclaireur Eagle',
@@ -400,9 +386,6 @@ export const achievements: AchievementDef[] = [
     maxProgress: 61,
   },
 
-  // ══════════════════════════════════════════════════════════════
-  // SPECIAL (6)
-  // ══════════════════════════════════════════════════════════════
   {
     id: 'button-masher',
     name: 'Bourrin du Clavier',

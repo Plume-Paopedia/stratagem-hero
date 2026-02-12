@@ -11,7 +11,6 @@ for (const s of stratagems) {
   (tierStratagemIds[s.tier] ??= []).push(s.id);
 }
 
-/** Called after each game session with the session + cumulative stats */
 export function checkSessionAchievements(
   session: SessionStats,
   stats: GlobalStats,
@@ -21,7 +20,6 @@ export function checkSessionAchievements(
   const successes = session.attempts.filter(a => a.success);
   const successCount = successes.length;
 
-  // ── Score achievements ──────────────────────────────────────
   if (session.totalScore >= 1000) unlock('score-1k');
   if (session.totalScore >= 5000) unlock('score-5k');
   if (session.totalScore >= 10000) unlock('score-10k');
@@ -32,7 +30,6 @@ export function checkSessionAchievements(
   if (session.mode === 'survival' && session.totalScore >= 10000) unlock('survival-specialist');
   if (session.mode === 'accuracy' && session.totalScore >= 10000) unlock('accuracy-ace');
 
-  // ── Flawless achievements ───────────────────────────────────
   const totalAttempts = session.attempts.length;
   if (totalAttempts > 0 && successCount === totalAttempts) {
     if (successCount >= 10) unlock('flawless-10');
@@ -40,63 +37,52 @@ export function checkSessionAchievements(
     if (successCount >= 20) unlock('perfectionist');
   }
 
-  // ── Blitz (avg time) ────────────────────────────────────────
   if (successCount >= 10 && session.averageTimeMs < 1500) {
     unlock('blitz');
   }
 
-  // ── Night Owl ───────────────────────────────────────────────
   const hour = new Date(session.date).getHours();
   if (hour >= 2 && hour < 5) unlock('night-owl');
 
-  // ── Cumulative: completion ──────────────────────────────────
   const totalSessions = stats.totalSessions;
   if (totalSessions >= 1) setProgress('first-deployment', totalSessions);
   if (!isUnlocked('regular')) setProgress('regular', Math.min(totalSessions, 10));
   if (!isUnlocked('veteran')) setProgress('veteran', Math.min(totalSessions, 50));
   if (!isUnlocked('hero-of-super-earth')) setProgress('hero-of-super-earth', Math.min(totalSessions, 500));
 
-  // ── Play time ───────────────────────────────────────────────
   const totalTime = stats.totalPlayTimeMs;
   if (!isUnlocked('marathon')) setProgress('marathon', Math.min(totalTime, 3600000));
   if (!isUnlocked('endurance')) setProgress('endurance', Math.min(totalTime, 18000000));
   if (!isUnlocked('dedicated')) setProgress('dedicated', Math.min(totalTime, 36000000));
 
-  // ── Total stratagems ────────────────────────────────────────
   const totalCompleted = stats.totalStratagemsCompleted;
   if (!isUnlocked('centurion')) setProgress('centurion', Math.min(totalCompleted, 100));
   if (!isUnlocked('millennium')) setProgress('millennium', Math.min(totalCompleted, 1000));
 
-  // ── Errors ──────────────────────────────────────────────────
   const totalErrors = stats.totalErrors;
   if (!isUnlocked('button-masher')) setProgress('button-masher', Math.min(totalErrors, 100));
 
-  // ── All-Rounder (modes played) ──────────────────────────────
   if (!isUnlocked('all-rounder')) {
     const modes = new Set(stats.sessions.map(s => s.mode));
     setProgress('all-rounder', modes.size);
   }
 
-  // ── Collection: category completions ────────────────────────
   checkCollectionAchievements(stats);
 
-  // ── Speed cumulative (fast completions) ─────────────────────
   const fastCount = successes.filter(a => a.timeMs < 1000).length;
   if (fastCount > 0) {
     incrementProgress('speed-demon', fastCount);
-    // Re-check quick-deploy and rapid-response with global count
+
     const totalFast = countFastCompletions(stats);
     if (!isUnlocked('quick-deploy')) setProgress('quick-deploy', Math.min(totalFast, 50));
     if (!isUnlocked('rapid-response')) setProgress('rapid-response', Math.min(totalFast, 100));
   }
 
-  // ── Persistent (games in this browser session) ──────────────
   if (!isUnlocked('persistent')) {
     incrementProgress('persistent');
   }
 }
 
-/** Called in real-time during gameplay */
 export function checkLiveAchievement(
   type: 'combo-complete' | 'streak' | 'first-stratagem',
   data: {
@@ -165,12 +151,10 @@ function checkCollectionAchievements(stats: GlobalStats): void {
     }
   }
 
-  // Arsenal: all 61
   if (!isUnlocked('arsenal')) {
     setProgress('arsenal', completed.size);
   }
 
-  // Completionist: all 61 with 10+ successes each
   if (!isUnlocked('completionist')) {
     let count = 0;
     for (const s of stratagems) {
@@ -179,7 +163,6 @@ function checkCollectionAchievements(stats: GlobalStats): void {
     setProgress('completionist', count);
   }
 
-  // Strategist: all expert-tier
   if (!isUnlocked('strategist')) {
     const expertIds = tierStratagemIds['expert'] ?? [];
     const doneExperts = expertIds.filter(id => completed.has(id)).length;

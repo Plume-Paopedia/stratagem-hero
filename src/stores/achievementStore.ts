@@ -1,13 +1,14 @@
 import { create } from 'zustand';
 import type { AchievementProgress } from '../types/achievements';
 import { achievements } from '../data/achievements';
-import { loadFromStorage, saveToStorage } from '../utils/storage';
+import { loadVersioned, saveVersioned } from '../utils/storage';
 
 const STORAGE_KEY = 'hd2-achievements';
+const SCHEMA_VERSION = 1;
 
 interface AchievementState {
   progress: Record<string, AchievementProgress>;
-  /** Queue of achievement IDs that need a toast notification */
+
   toastQueue: string[];
 }
 
@@ -40,12 +41,13 @@ function buildDefaults(): Record<string, AchievementProgress> {
 
 export const useAchievementStore = create<AchievementStore>((set, get) => {
   const defaults = buildDefaults();
-  const saved = loadFromStorage<AchievementState>(STORAGE_KEY, {
-    progress: defaults,
-    toastQueue: [],
-  });
+  const saved = loadVersioned<AchievementState>(
+    STORAGE_KEY,
+    SCHEMA_VERSION,
+    (raw) => ({ progress: defaults, toastQueue: [], ...(raw as Partial<AchievementState>) }),
+    { progress: defaults, toastQueue: [] },
+  );
 
-  // Merge saved with defaults so new achievements get initialized
   const merged: Record<string, AchievementProgress> = { ...defaults };
   for (const [id, prog] of Object.entries(saved.progress)) {
     if (merged[id]) {
@@ -55,7 +57,7 @@ export const useAchievementStore = create<AchievementStore>((set, get) => {
 
   const persist = () => {
     const s = get();
-    saveToStorage<AchievementState>(STORAGE_KEY, {
+    saveVersioned<AchievementState>(STORAGE_KEY, SCHEMA_VERSION, {
       progress: s.progress,
       toastQueue: s.toastQueue,
     });
@@ -138,7 +140,7 @@ export const useAchievementStore = create<AchievementStore>((set, get) => {
     reset: () => {
       const defaults = buildDefaults();
       set({ progress: defaults, toastQueue: [] });
-      saveToStorage(STORAGE_KEY, { progress: defaults, toastQueue: [] });
+      saveVersioned(STORAGE_KEY, SCHEMA_VERSION, { progress: defaults, toastQueue: [] });
     },
   };
 });

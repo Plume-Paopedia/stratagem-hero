@@ -32,7 +32,6 @@ export function LeaderboardScreen({ onClose, initialMode }: LeaderboardScreenPro
         Meilleurs Scores
       </motion.h2>
 
-      {/* Mode tabs */}
       <div className="flex flex-wrap justify-center gap-2">
         {MODES.map((m) => (
           <button
@@ -49,14 +48,12 @@ export function LeaderboardScreen({ onClose, initialMode }: LeaderboardScreenPro
         ))}
       </div>
 
-      {/* Leaderboard table */}
       <motion.div
         className="w-full max-w-lg"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.1 }}
       >
-        {/* Header row */}
         <div className="grid grid-cols-[2.5rem_3rem_1fr_5rem_3.5rem] gap-2 px-3 py-2 text-xs font-heading uppercase tracking-wider text-hd-gray border-b border-hd-border">
           <span>Rang</span>
           <span>Nom</span>
@@ -65,7 +62,6 @@ export function LeaderboardScreen({ onClose, initialMode }: LeaderboardScreenPro
           <span className="text-right">Serie</span>
         </div>
 
-        {/* Entries */}
         {Array.from({ length: 10 }, (_, i) => {
           const entry = entries[i];
           const rank = i + 1;

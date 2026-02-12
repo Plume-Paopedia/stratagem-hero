@@ -41,7 +41,6 @@ export function StreakAnnouncement({ multiplier, trigger }: StreakAnnouncementPr
         key={`announcement-${trigger}`}
         className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center"
       >
-        {/* x4: Darkened backdrop */}
         {isMax && (
           <motion.div
             className="absolute inset-0 bg-black/40"
@@ -51,7 +50,6 @@ export function StreakAnnouncement({ multiplier, trigger }: StreakAnnouncementPr
           />
         )}
 
-        {/* Horizontal decorative lines (x3+) */}
         {m >= 3 && (
           <>
             <motion.div
@@ -71,7 +69,6 @@ export function StreakAnnouncement({ multiplier, trigger }: StreakAnnouncementPr
           </>
         )}
 
-        {/* Main text */}
         <motion.div
           className={`font-display ${m >= 4 ? 'text-4xl' : m >= 3 ? 'text-3xl' : 'text-2xl'} ${config.color} tracking-[0.4em] uppercase`}
           style={{
@@ -91,7 +88,6 @@ export function StreakAnnouncement({ multiplier, trigger }: StreakAnnouncementPr
           {config.text}
         </motion.div>
 
-        {/* Multiplier badge */}
         <motion.div
           className={`absolute font-display ${config.color} text-lg tracking-[0.2em]`}
           style={{
@@ -105,7 +101,6 @@ export function StreakAnnouncement({ multiplier, trigger }: StreakAnnouncementPr
           x{m} MULTIPLICATEUR
         </motion.div>
 
-        {/* x4: Faction icon */}
         {isMax && faction && (
           <motion.div
             className="absolute"

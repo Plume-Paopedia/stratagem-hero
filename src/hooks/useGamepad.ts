@@ -7,7 +7,6 @@ interface GamepadState {
   direction: Direction | null;
 }
 
-/** Hook for gamepad support with D-Pad and stick directions */
 export function useGamepad(onDirection: (dir: Direction) => void) {
   const deadzone = useSettingsStore((s) => s.gamepadDeadzone);
   const [connected, setConnected] = useState(false);
@@ -28,7 +27,7 @@ export function useGamepad(onDirection: (dir: Direction) => void) {
   );
 
   const getDpadDirection = useCallback((gamepad: Gamepad): Direction | null => {
-    // Standard mapping buttons 12-15 are D-pad
+
     if (gamepad.buttons[12]?.pressed) return 'up';
     if (gamepad.buttons[13]?.pressed) return 'down';
     if (gamepad.buttons[14]?.pressed) return 'left';
@@ -43,7 +42,6 @@ export function useGamepad(onDirection: (dir: Direction) => void) {
     window.addEventListener('gamepadconnected', onConnect);
     window.addEventListener('gamepaddisconnected', onDisconnect);
 
-    // Check if already connected
     const gamepads = navigator.getGamepads();
     for (const gp of gamepads) {
       if (gp) { setConnected(true); break; }
@@ -62,7 +60,7 @@ export function useGamepad(onDirection: (dir: Direction) => void) {
           onDirectionRef.current(dir);
         }
         lastDirection.current = dir;
-        break; // Use first gamepad
+        break;
       }
       rafRef.current = requestAnimationFrame(poll);
     };

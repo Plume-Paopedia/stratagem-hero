@@ -11,10 +11,6 @@ interface UseStratagemInputOptions {
   onError: (expected: Direction, actual: Direction) => void;
 }
 
-/**
- * Core hook for handling directional input against a stratagem's sequence.
- * Supports keyboard and gamepad simultaneously.
- */
 export function useStratagemInput({
   stratagem,
   active,
@@ -25,14 +21,12 @@ export function useStratagemInput({
   const { codeToDirection } = useKeyBindings();
   const inputIndexRef = useRef(0);
 
-  // Keep callbacks fresh
   const callbacksRef = useRef({ onCorrectInput, onComboComplete, onError });
   callbacksRef.current = { onCorrectInput, onComboComplete, onError };
 
   const stratagemRef = useRef(stratagem);
   stratagemRef.current = stratagem;
 
-  // Reset index when stratagem changes
   useEffect(() => {
     inputIndexRef.current = 0;
   }, [stratagem?.id]);
@@ -62,7 +56,6 @@ export function useStratagemInput({
     [active],
   );
 
-  // Keyboard handler
   useEffect(() => {
     if (!active) return;
 
@@ -79,7 +72,6 @@ export function useStratagemInput({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [active, codeToDirection, handleDirection]);
 
-  // Gamepad handler
   useGamepad(handleDirection);
 
   const resetInput = useCallback(() => {

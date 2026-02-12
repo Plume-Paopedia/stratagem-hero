@@ -3,17 +3,17 @@ import type { StratagemCategory, StratagemTier } from './index';
 export interface CustomModeConfig {
   name: string;
   timerType: 'none' | 'countdown' | 'countup' | 'survival';
-  timerDuration: number; // in seconds, for countdown/survival
-  lives: number; // 0 = unlimited
+  timerDuration: number;
+  lives: number;
   errorBehavior: 'reset-streak' | 'lose-life' | 'time-penalty' | 'end-game';
-  timePenaltyMs: number; // for time-penalty error behavior
+  timePenaltyMs: number;
   queueSource: 'all' | 'category' | 'tier' | 'custom';
   category?: StratagemCategory;
   tier?: StratagemTier;
   customStratagemIds?: string[];
-  queueLength: number; // 0 = all matching
+  queueLength: number;
   shuffle: boolean;
-  scoreMultiplier: number; // 0.5 - 3
+  scoreMultiplier: number;
 }
 
 export interface CustomModePreset {

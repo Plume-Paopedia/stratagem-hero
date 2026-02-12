@@ -10,7 +10,7 @@ import {
 describe('calculateScore', () => {
   it('returns base score for slow completion', () => {
     const result = calculateScore(10000, 4, 1);
-    expect(result.base).toBe(140); // 100 + 4*10
+    expect(result.base).toBe(140);
     expect(result.speedBonus).toBe(0);
     expect(result.total).toBe(140);
   });
@@ -29,7 +29,7 @@ describe('calculateScore', () => {
 
   it('handles zero time', () => {
     const result = calculateScore(0, 4, 1);
-    expect(result.speedBonus).toBe(150); // MAX_SPEED_BONUS
+    expect(result.speedBonus).toBe(150);
   });
 });
 

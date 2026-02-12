@@ -1,18 +1,13 @@
 import { useFactionStore } from '../../stores/factionStore';
 import { FACTIONS } from '../../types/factions';
 
-/**
- * CRT scanline + vignette + subtle screen flicker overlay.
- * Tints to match the active faction.
- */
 export function ScanlineOverlay() {
   const faction = useFactionStore((s) => s.activeFaction);
   const factionColor = faction ? FACTIONS[faction].colors.primary : '#f5c518';
-  const bracketOpacity = faction ? '33' : '33'; // 20% hex opacity
+  const bracketOpacity = faction ? '33' : '33';
 
   return (
     <div className="fixed inset-0 pointer-events-none z-50" aria-hidden="true">
-      {/* Animated scanline sweep */}
       <div
         className="absolute inset-0 opacity-[0.03]"
         style={{
@@ -22,7 +17,6 @@ export function ScanlineOverlay() {
         }}
       />
 
-      {/* Single moving scan line — faction tinted */}
       <div
         className="absolute left-0 right-0 h-[2px] opacity-[0.06]"
         style={{
@@ -31,7 +25,6 @@ export function ScanlineOverlay() {
         }}
       />
 
-      {/* Heavy vignette */}
       <div
         className="absolute inset-0"
         style={{
@@ -40,7 +33,6 @@ export function ScanlineOverlay() {
         }}
       />
 
-      {/* Corner decorations — military HUD brackets — faction tinted */}
       <svg className="absolute top-3 left-3 w-8 h-8" style={{ color: `${factionColor}${bracketOpacity}` }}>
         <path d="M0 24 L0 0 L24 0" fill="none" stroke="currentColor" strokeWidth="1.5" />
       </svg>

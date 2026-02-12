@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { motion } from 'framer-motion';
 import type { Stratagem } from '../../types';
 import { DirectionArrow } from './DirectionArrow';
@@ -16,7 +17,7 @@ const tierColors = {
   expert: 'border-hd-red/30',
 };
 
-export function StratagemCard({
+export const StratagemCard = memo(function StratagemCard({
   stratagem,
   selected = false,
   compact = false,
@@ -75,4 +76,4 @@ export function StratagemCard({
       </span>
     </motion.button>
   );
-}
+});

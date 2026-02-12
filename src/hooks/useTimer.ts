@@ -7,7 +7,6 @@ interface UseTimerOptions {
   active?: boolean;
 }
 
-/** High-precision timer hook using requestAnimationFrame */
 export function useTimer({ initialMs, countDown = true, onComplete, active = false }: UseTimerOptions) {
   const [timeMs, setTimeMs] = useState(initialMs);
   const lastFrameRef = useRef<number>(0);

@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../ui/Button';
 import { useSettingsStore } from '../../stores/settingsStore';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 interface TutorialStep {
   title: string;
@@ -52,6 +53,9 @@ export function TutorialOverlay({ onComplete }: TutorialOverlayProps) {
   const [step, setStep] = useState(0);
   const [interactionDone, setInteractionDone] = useState(false);
   const completeTutorial = useSettingsStore((s) => s.completeTutorial);
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  useFocusTrap(overlayRef, true);
 
   const current = steps[step];
 
@@ -70,7 +74,6 @@ export function TutorialOverlay({ onComplete }: TutorialOverlayProps) {
     onComplete();
   }, [completeTutorial, onComplete]);
 
-  // Listen for W/ArrowUp on interactive step
   useEffect(() => {
     if (current.interactive !== 'press-w') return;
 
@@ -89,6 +92,10 @@ export function TutorialOverlay({ onComplete }: TutorialOverlayProps) {
 
   return (
     <motion.div
+      ref={overlayRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Tutoriel"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -110,7 +117,6 @@ export function TutorialOverlay({ onComplete }: TutorialOverlayProps) {
           {current.description}
         </p>
 
-        {/* Interactive feedback */}
         {current.interactive === 'press-w' && (
           <div className="mb-6">
             <AnimatePresence mode="wait">
@@ -139,7 +145,6 @@ export function TutorialOverlay({ onComplete }: TutorialOverlayProps) {
           </div>
         )}
 
-        {/* Progress dots */}
         <div className="flex justify-center gap-2 mb-6">
           {steps.map((_, i) => (
             <div
@@ -151,7 +156,6 @@ export function TutorialOverlay({ onComplete }: TutorialOverlayProps) {
           ))}
         </div>
 
-        {/* Actions */}
         <div className="flex justify-center gap-3">
           <Button variant="ghost" size="sm" onClick={skip}>
             Passer le Tutoriel

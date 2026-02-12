@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-// Stratagem type used for filtering
+
 import { stratagems, categories } from '../../data/stratagems';
 import { StratagemCard } from './StratagemCard';
 
@@ -31,7 +31,6 @@ export function StratagemGrid({ selected, onToggle, multiSelect = true }: Strata
 
   return (
     <div className="flex flex-col gap-4 h-full">
-      {/* Search */}
       <input
         type="text"
         placeholder="Rechercher..."
@@ -42,7 +41,6 @@ export function StratagemGrid({ selected, onToggle, multiSelect = true }: Strata
                    focus:outline-none focus:border-hd-yellow/50"
       />
 
-      {/* Category tabs */}
       <div className="flex gap-1 flex-wrap">
         <TabButton active={filter === 'all'} onClick={() => setFilter('all')}>
           All
@@ -63,14 +61,12 @@ export function StratagemGrid({ selected, onToggle, multiSelect = true }: Strata
         ))}
       </div>
 
-      {/* Selection count */}
       {multiSelect && (
         <div className="text-sm text-hd-gray font-heading">
           {selected.size} selectionne(s)
         </div>
       )}
 
-      {/* Grid */}
       <div className="flex-1 overflow-y-auto pr-2 space-y-6">
         {grouped.map(({ category, items }) => (
           <div key={category}>

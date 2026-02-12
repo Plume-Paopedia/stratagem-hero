@@ -1,6 +1,5 @@
 let audioCtx: AudioContext | null = null;
 
-/** Get or create the shared AudioContext */
 function getContext(): AudioContext {
   if (!audioCtx) {
     audioCtx = new AudioContext();
@@ -11,7 +10,6 @@ function getContext(): AudioContext {
   return audioCtx;
 }
 
-/** Play a pure tone */
 function playTone(
   frequency: number,
   duration: number,
@@ -37,7 +35,6 @@ function playTone(
   osc.stop(ctx.currentTime + duration);
 }
 
-/** Play a frequency sweep */
 function playSweep(
   startFreq: number,
   endFreq: number,
@@ -61,7 +58,6 @@ function playSweep(
   osc.stop(ctx.currentTime + duration);
 }
 
-/** Play white noise burst */
 function playNoise(duration: number, volume: number) {
   const ctx = getContext();
   const bufferSize = ctx.sampleRate * duration;
@@ -84,7 +80,6 @@ function playNoise(duration: number, volume: number) {
   source.start(ctx.currentTime);
 }
 
-/** Play a chord (multiple tones at once) */
 function playChord(
   frequencies: number[],
   duration: number,
@@ -97,8 +92,6 @@ function playChord(
   }
 }
 
-// ── Public sound functions ────────────────────────────────
-
 export function playInputBeep(volume: number) {
   playTone(800, 0.05, volume * 0.3, 'square');
 }
@@ -106,7 +99,7 @@ export function playInputBeep(volume: number) {
 export function playSuccessJingle(volume: number) {
   const ctx = getContext();
   const v = volume * 0.25;
-  // C-E-G ascending quick arpeggio
+
   setTimeout(() => playTone(523, 0.15, v, 'square'), 0);
   setTimeout(() => {
     if (ctx.state === 'running') playTone(659, 0.15, v, 'square');
@@ -125,27 +118,27 @@ export function playStreakUp(level: number, volume: number) {
   const v = volume * 0.25;
   if (level === 2) {
     playSweep(400, 800, 0.1, v, 'square');
-    // Quick C-E-G arpeggio
+
     setTimeout(() => playTone(523, 0.06, v * 0.5, 'square'), 50);
     setTimeout(() => playTone(659, 0.06, v * 0.5, 'square'), 90);
     setTimeout(() => playTone(784, 0.08, v * 0.5, 'square'), 130);
   } else if (level === 3) {
     playSweep(300, 1200, 0.15, v, 'square');
-    // Chord + timpani
+
     playChord([523, 659, 784], 0.2, v * 0.6, 'square');
-    playTone(80, 0.15, v * 0.8, 'sine'); // timpani
+    playTone(80, 0.15, v * 0.8, 'sine');
   } else if (level >= 4) {
-    // Full fanfare — ascending arpeggio
+
     playSweep(400, 1600, 0.2, v, 'square');
     playSweep(600, 1800, 0.15, v * 0.6, 'sine');
     const notes = [523, 659, 784, 1047, 1319];
     notes.forEach((freq, i) => {
       setTimeout(() => playTone(freq, 0.1, v * 0.6, 'square'), i * 60);
     });
-    // Double timpani
+
     playTone(60, 0.2, v * 0.9, 'sine');
     setTimeout(() => playTone(80, 0.15, v * 0.7, 'sine'), 100);
-    // Noise burst finale
+
     setTimeout(() => playNoise(0.08, v * 0.4), 280);
   }
 }
@@ -182,14 +175,13 @@ export function playDeploySound(volume: number) {
 
 export function playRecordFanfare(volume: number) {
   const v = volume * 0.2;
-  // Quick major arpeggio: C-E-G-C
+
   setTimeout(() => playTone(523, 0.12, v, 'square'), 0);
   setTimeout(() => playTone(659, 0.12, v, 'square'), 80);
   setTimeout(() => playTone(784, 0.12, v, 'square'), 160);
   setTimeout(() => playTone(1047, 0.2, v, 'square'), 240);
 }
 
-/** Power surge drone for x3+ streaks */
 export function playPowerSurge(multiplier: number, volume: number) {
   const v = volume * 0.15;
   const ctx = getContext();
@@ -209,7 +201,6 @@ export function playPowerSurge(multiplier: number, volume: number) {
   osc.start(now);
   osc.stop(now + 0.35);
 
-  // Overtones at x4
   if (multiplier >= 4) {
     [160, 240].forEach((freq) => {
       const o = ctx.createOscillator();
@@ -226,23 +217,20 @@ export function playPowerSurge(multiplier: number, volume: number) {
   }
 }
 
-/** Short tick for arcade letter scrolling */
 export function playLetterTick(volume: number) {
   playTone(1200, 0.015, volume * 0.12, 'square');
 }
 
-/** Lock-in sound for arcade slot confirm */
 export function playSlotConfirm(volume: number) {
   playTone(880, 0.08, volume * 0.2, 'square');
   setTimeout(() => playTone(1100, 0.06, volume * 0.15, 'square'), 50);
 }
 
-/** Orbital strike incoming sound for x4 combo completions */
 export function playOrbitalStrike(volume: number) {
   const v = volume * 0.25;
-  // Descending ordnance sweep
+
   playSweep(4000, 200, 0.4, v, 'sawtooth');
-  // Bass explosion after delay
+
   setTimeout(() => {
     playNoise(0.15, v * 0.6);
     playTone(60, 0.3, v * 0.8, 'sine');

@@ -1,73 +1,92 @@
-# React + TypeScript + Vite
+# Stratagem Hero
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> Entraineur de combos de stratagemes Helldivers 2 — 11 modes de jeu, succes, classements, stats et OST officiel. PWA jouable hors-ligne.
 
-Currently, two official plugins are available:
+<br>
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Demarrage rapide
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+| Commande | |
+|---|---|
+| `npm run dev` | Serveur de dev (HMR) |
+| `npm run build` | Type check + build prod |
+| `npm run lint` | ESLint |
+| `npm run test` | Tests unitaires |
+| `npm run test:coverage` | Couverture de code |
+| `npm run preview` | Preview du build |
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+<br>
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Stack
+
+React 19 · TypeScript 5.9 (strict) · Vite 7 · Tailwind CSS 4 · Zustand 5 · Framer Motion 12 · Vitest · vite-plugin-pwa
+
+<br>
+
+## Modes de jeu
+
+| Mode | Description |
+|---|---|
+| Entrainement Libre | Sans chrono, selection libre |
+| Contre-la-Montre | Max de combos en temps limite |
+| Precision | N combos avec precision max |
+| Survie | Chrono decroissant, erreur = game over |
+| Quiz | Combos de memoire, 3 vies |
+| Defi du Jour | Meme defi pour tous, 1 tentative/jour |
+| Speed Run | 61 stratagemes le plus vite possible |
+| Infini | Timer reset par combo, erreurs = -3s |
+| Categorie | Maitriser une categorie entiere |
+| Boss Rush | Boss tous les 10 combos |
+| Personnalise | Regles custom, presets, partage URL |
+
+<br>
+
+## Fonctionnalites
+
+- 61 stratagemes avec icones SVG authentiques HD2
+- 50 succes deblocables
+- Classements locaux par mode
+- Stats detaillees + historique de sessions + export/import JSON
+- Support manette (deadzone configurable)
+- Raccourcis clavier personnalisables
+- Modes daltonien, haut contraste, mouvement reduit
+- Tutoriel interactif
+- Musique et SFX (OST HD2)
+- PWA installable, jouable offline
+
+<br>
+
+## Structure
+
 ```
+src/
+  components/    Composants React (game, ui, layout, achievements, ...)
+  hooks/         useGameLogic, useStratagemInput, useAudio, useTimer, ...
+  stores/        Zustand — settings, stats, leaderboard, achievements, custom
+  data/          61 stratagemes, 50 succes, categories
+  config/        Configuration par mode de jeu
+  types/         Types TypeScript
+  utils/         Scoring, storage, audio, export
+  styles/        CSS globaux + accessibilite
+public/
+  icons/         65 icones SVG HD2
+  images/        Backgrounds
+  audio/         OST + SFX
+```
+
+<br>
+
+## Deploiement
+
+Push sur `master` → deploy automatique sur **Vercel**.
+
+<br>
+
+## Licence
+
+Projet personnel. Helldivers 2 est une marque d'Arrowhead Game Studios / Sony Interactive Entertainment.

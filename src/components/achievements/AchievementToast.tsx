@@ -19,14 +19,12 @@ export function AchievementToast() {
     }
   }, [popToast, markNotified, audio]);
 
-  // Poll for new toasts
   useEffect(() => {
     if (current) return;
     const id = setInterval(showNext, 500);
     return () => clearInterval(id);
   }, [current, showNext]);
 
-  // Auto-dismiss after 5s
   useEffect(() => {
     if (!current) return;
     const timer = setTimeout(() => setCurrent(null), 5000);
@@ -44,6 +42,8 @@ export function AchievementToast() {
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: 400, opacity: 0 }}
           transition={{ type: 'spring', damping: 20 }}
+          role="alert"
+          aria-live="assertive"
           className="fixed top-20 right-4 z-50 flex items-center gap-3 px-5 py-3 bg-hd-dark/95 border border-hd-yellow rounded-lg shadow-lg shadow-hd-yellow/10 backdrop-blur-sm cursor-pointer max-w-sm"
           onClick={() => setCurrent(null)}
         >

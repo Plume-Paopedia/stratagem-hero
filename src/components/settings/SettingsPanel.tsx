@@ -20,7 +20,6 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
     <div className="flex flex-col gap-6 max-w-md mx-auto w-full p-6">
       <h2 className="font-display text-2xl text-hd-yellow uppercase tracking-wider">Parametres</h2>
 
-      {/* Volume */}
       <div className="flex flex-col gap-2">
         <label className="font-heading text-sm text-hd-gray uppercase tracking-wider">
           Volume General : {settings.masterVolume}%
@@ -35,21 +34,18 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
         />
       </div>
 
-      {/* SFX Toggle */}
       <ToggleRow
         label="Effets Sonores"
         value={settings.sfxEnabled}
         onChange={settings.toggleSfx}
       />
 
-      {/* Music Toggle */}
       <ToggleRow
         label="Musique"
         value={settings.musicEnabled}
         onChange={settings.toggleMusic}
       />
 
-      {/* Music Volume */}
       {settings.musicEnabled && (
         <div className="flex flex-col gap-2">
           <label className="font-heading text-sm text-hd-gray uppercase tracking-wider">
@@ -66,7 +62,6 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
         </div>
       )}
 
-      {/* Colorblind mode */}
       <div className="flex flex-col gap-2">
         <label className="font-heading text-sm text-hd-gray uppercase tracking-wider">
           Mode Daltonien
@@ -90,21 +85,18 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
         </div>
       </div>
 
-      {/* High contrast */}
       <ToggleRow
         label="Haut Contraste"
         value={settings.highContrastMode}
         onChange={settings.toggleHighContrast}
       />
 
-      {/* Reduced motion */}
       <ToggleRow
         label="Animations Reduites"
         value={settings.reducedMotion}
         onChange={settings.toggleReducedMotion}
       />
 
-      {/* Gamepad deadzone */}
       <div className="flex flex-col gap-2">
         <label className="font-heading text-sm text-hd-gray uppercase tracking-wider">
           Zone Morte Manette : {(settings.gamepadDeadzone * 100).toFixed(0)}%
@@ -119,7 +111,6 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
         />
       </div>
 
-      {/* Time Attack Duration */}
       <div className="flex flex-col gap-2">
         <label className="font-heading text-sm text-hd-gray uppercase tracking-wider">
           Duree Contre-la-Montre
@@ -138,7 +129,6 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
         </div>
       </div>
 
-      {/* Accuracy Target */}
       <div className="flex flex-col gap-2">
         <label className="font-heading text-sm text-hd-gray uppercase tracking-wider">
           Objectif Defi Precision
@@ -157,15 +147,12 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
         </div>
       </div>
 
-      {/* Keybinds */}
       <Button variant="secondary" onClick={() => setShowKeybinds(true)}>
         Configurer les Touches
       </Button>
 
-      {/* Data Management */}
       <DataManagement />
 
-      {/* Reset */}
       <Button variant="danger" size="sm" onClick={settings.resetToDefaults}>
         Reinitialiser
       </Button>

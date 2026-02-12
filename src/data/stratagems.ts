@@ -20,7 +20,7 @@ function s(
 }
 
 export const stratagems: Stratagem[] = [
-  // ── General Stratagems ─────────────────────────────────────
+
   s('reinforce', 'Reinforce', 'General Stratagems',
     ['up', 'down', 'right', 'left', 'up'], 0, 'infinite',
     'Call in reinforcements to revive fallen Helldivers.', '🪖'),
@@ -43,7 +43,6 @@ export const stratagems: Stratagem[] = [
     ['up', 'up', 'left', 'right', 'down', 'down'], 0, 'infinite',
     'Deploy a seismic probe for geological surveys.', '📍'),
 
-  // ── Patriotic Administration Center (Eagle) ────────────────
   s('eagle-strafing-run', 'Eagle Strafing Run', 'Patriotic Administration Center',
     ['up', 'right', 'right'], 15, 'infinite',
     'Eagle performs a strafing run with its cannons.', '✈️'),
@@ -66,7 +65,6 @@ export const stratagems: Stratagem[] = [
     ['up', 'right', 'down', 'down', 'down'], 15, 'infinite',
     'Eagle drops a single devastating 500kg bomb.', '☢️'),
 
-  // ── Orbital Cannons / Bridge ───────────────────────────────
   s('orbital-gatling-barrage', 'Orbital Gatling Barrage', 'Orbital Cannons',
     ['right', 'down', 'left', 'up', 'up'], 80, 'infinite',
     'Super Destroyer fires a sustained gatling barrage.', '🔫'),
@@ -104,7 +102,6 @@ export const stratagems: Stratagem[] = [
     ['right', 'right', 'down', 'left', 'right', 'up'], 240, 'infinite',
     'Rains napalm from orbit, setting a wide area ablaze.', '🔥'),
 
-  // ── Engineering Bay (Support Weapons) ──────────────────────
   s('machine-gun', 'Machine Gun', 'Engineering Bay',
     ['down', 'left', 'down', 'up', 'right'], 480, 'infinite',
     'A versatile belt-fed machine gun for sustained fire.', '🔫'),
@@ -154,7 +151,6 @@ export const stratagems: Stratagem[] = [
     ['down', 'left', 'up', 'down', 'right'], 480, 'infinite',
     'Guided missile launcher with manual steering.', '🎯'),
 
-  // ── Robotics Workshop (Sentries & Defenses) ────────────────
   s('machine-gun-sentry', 'Machine Gun Sentry', 'Robotics Workshop',
     ['down', 'up', 'right', 'right', 'up'], 180, 'infinite',
     'Automated sentry with a machine gun.', '🤖'),
@@ -186,7 +182,6 @@ export const stratagems: Stratagem[] = [
     ['down', 'up', 'right', 'up', 'left', 'right'], 180, 'infinite',
     'Automated tower that zaps nearby enemies with electricity.', '⚡'),
 
-  // ── Hangar (Backpacks & Support) ───────────────────────────
   s('guard-dog-rover', 'Guard Dog Rover', 'Hangar',
     ['down', 'up', 'left', 'up', 'right', 'right'], 480, 'infinite',
     'Autonomous laser drone that orbits and defends you.', '🐕'),
@@ -209,7 +204,6 @@ export const stratagems: Stratagem[] = [
     ['down', 'up', 'left', 'up', 'right', 'up'], 480, 'infinite',
     'Guard Dog variant armed with a flamethrower.', '🐕'),
 
-  // ── Vehicles (Bridge) ──────────────────────────────────────
   s('patriot-exosuit', 'Patriot Exosuit', 'Hangar',
     ['left', 'down', 'right', 'up', 'left', 'down', 'down'], 600, 1,
     'Pilotable mech with a gatling gun and rocket launcher.', '🤖'),
@@ -218,15 +212,12 @@ export const stratagems: Stratagem[] = [
     'Dual-autocannon exosuit for heavy firepower.', '🤖'),
 ];
 
-/** Lookup map by id */
 export const stratagemMap = new Map(stratagems.map(s => [s.id, s]));
 
-/** Get stratagems by category */
 export function getByCategory(category: Stratagem['category']): Stratagem[] {
   return stratagems.filter(s => s.category === category);
 }
 
-/** All unique categories in order */
 export const categories: Stratagem['category'][] = [
   'General Stratagems',
   'Patriotic Administration Center',

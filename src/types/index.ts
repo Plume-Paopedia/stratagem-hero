@@ -1,7 +1,6 @@
-/** Directional input for stratagem combos */
+
 export type Direction = 'up' | 'down' | 'left' | 'right';
 
-/** Categories matching in-game stratagem groupings */
 export type StratagemCategory =
   | 'Patriotic Administration Center'
   | 'Orbital Cannons'
@@ -12,10 +11,8 @@ export type StratagemCategory =
   | 'General Stratagems'
   | 'Mission Stratagems';
 
-/** Difficulty tier based on combo length */
 export type StratagemTier = 'basic' | 'advanced' | 'expert';
 
-/** A single stratagem definition */
 export interface Stratagem {
   id: string;
   name: string;
@@ -29,7 +26,6 @@ export interface Stratagem {
   tier: StratagemTier;
 }
 
-/** Available game modes */
 export type GameMode =
   | 'free-practice'
   | 'time-attack'
@@ -43,13 +39,10 @@ export type GameMode =
   | 'boss-rush'
   | 'custom';
 
-/** Game states */
 export type GameState = 'idle' | 'countdown' | 'playing' | 'paused' | 'game-over';
 
-/** Input result for a single direction */
 export type InputResult = 'correct' | 'wrong' | 'pending';
 
-/** Result for a completed stratagem attempt */
 export interface StratagemAttempt {
   stratagemId: string;
   success: boolean;
@@ -59,7 +52,6 @@ export interface StratagemAttempt {
   timestamp: number;
 }
 
-/** Score breakdown */
 export interface ScoreBreakdown {
   base: number;
   speedBonus: number;
@@ -67,7 +59,6 @@ export interface ScoreBreakdown {
   total: number;
 }
 
-/** Session statistics */
 export interface SessionStats {
   mode: GameMode;
   date: number;
@@ -79,7 +70,6 @@ export interface SessionStats {
   averageTimeMs: number;
 }
 
-/** Per-stratagem statistics */
 export interface StratagemStats {
   stratagemId: string;
   totalAttempts: number;
@@ -90,7 +80,6 @@ export interface StratagemStats {
   errorsByPosition: number[];
 }
 
-/** Global persistent statistics */
 export interface GlobalStats {
   totalSessions: number;
   totalPlayTimeMs: number;
@@ -103,7 +92,6 @@ export interface GlobalStats {
   directionErrorCounts: Record<Direction, number>;
 }
 
-/** Key binding configuration */
 export interface KeyBindings {
   up: string[];
   down: string[];
@@ -115,7 +103,6 @@ export interface KeyBindings {
   pause: string[];
 }
 
-/** User settings */
 export interface UserSettings {
   masterVolume: number;
   sfxEnabled: boolean;
@@ -131,13 +118,10 @@ export interface UserSettings {
   hasCompletedTutorial: boolean;
 }
 
-/** Time attack duration options */
 export type TimeAttackDuration = 60 | 90 | 120;
 
-/** Accuracy target count options */
 export type AccuracyTargetCount = 20 | 50 | 100;
 
-/** A single leaderboard entry */
 export interface LeaderboardEntry {
   initials: string;
   score: number;
@@ -145,10 +129,8 @@ export interface LeaderboardEntry {
   date: number;
 }
 
-/** All leaderboards, keyed by game mode */
 export type Leaderboards = Partial<Record<GameMode, LeaderboardEntry[]>>;
 
-/** App screen/route */
 export type AppScreen =
   | 'menu'
   | 'mode-select'

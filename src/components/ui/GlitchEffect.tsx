@@ -4,10 +4,6 @@ interface GlitchEffectProps {
   trigger: number;
 }
 
-/**
- * Full-screen glitch/static effect triggered on errors.
- * RGB split + noise bars + chromatic aberration.
- */
 export function GlitchEffect({ trigger }: GlitchEffectProps) {
   return (
     <AnimatePresence>
@@ -19,7 +15,6 @@ export function GlitchEffect({ trigger }: GlitchEffectProps) {
           animate={{ opacity: 0 }}
           transition={{ duration: 0.35 }}
         >
-          {/* RGB split bars */}
           {Array.from({ length: 6 }).map((_, i) => {
             const top = Math.random() * 100;
             const height = 2 + Math.random() * 8;
@@ -43,7 +38,6 @@ export function GlitchEffect({ trigger }: GlitchEffectProps) {
             );
           })}
 
-          {/* Noise static overlay */}
           <motion.div
             className="absolute inset-0"
             style={{
@@ -55,7 +49,6 @@ export function GlitchEffect({ trigger }: GlitchEffectProps) {
             transition={{ duration: 0.3 }}
           />
 
-          {/* Red tint */}
           <motion.div
             className="absolute inset-0 bg-hd-red/5"
             initial={{ opacity: 1 }}

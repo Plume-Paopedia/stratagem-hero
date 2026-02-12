@@ -14,7 +14,6 @@ export function StatsOverview({ onClose }: StatsOverviewProps) {
   const totalMinutes = Math.floor(stats.totalPlayTimeMs / 60000);
   const directionTotals = stats.directionErrorCounts;
 
-  // Find most practiced stratagem
   const stratagemEntries = Object.values(stats.stratagemStats);
   const mostPracticed = stratagemEntries.sort((a, b) => b.totalAttempts - a.totalAttempts)[0];
   const mostFailed = stratagemEntries.sort((a, b) => b.failures - a.failures)[0];
@@ -28,7 +27,6 @@ export function StatsOverview({ onClose }: StatsOverviewProps) {
         Statistiques
       </h2>
 
-      {/* Overview cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <StatCard label="Sessions" value={String(stats.totalSessions)} />
         <StatCard label="Temps de Jeu" value={`${totalMinutes}m`} />
@@ -36,7 +34,6 @@ export function StatsOverview({ onClose }: StatsOverviewProps) {
         <StatCard label="Erreurs Totales" value={String(stats.totalErrors)} />
       </div>
 
-      {/* Best scores */}
       {Object.keys(stats.bestScores).length > 0 && (
         <div>
           <h3 className="font-heading text-sm text-hd-gray uppercase tracking-wider mb-3">
@@ -55,7 +52,6 @@ export function StatsOverview({ onClose }: StatsOverviewProps) {
         </div>
       )}
 
-      {/* Notable stratagems */}
       <div>
         <h3 className="font-heading text-sm text-hd-gray uppercase tracking-wider mb-3">
           Faits Marquants
@@ -85,7 +81,6 @@ export function StatsOverview({ onClose }: StatsOverviewProps) {
         </div>
       </div>
 
-      {/* Direction error heatmap */}
       <div>
         <h3 className="font-heading text-sm text-hd-gray uppercase tracking-wider mb-3">
           Erreurs de Direction
@@ -93,7 +88,6 @@ export function StatsOverview({ onClose }: StatsOverviewProps) {
         <DirectionHeatmap errors={directionTotals} />
       </div>
 
-      {/* Accuracy over time (simple SVG chart) */}
       {stats.sessions.length > 1 && (
         <div>
           <h3 className="font-heading text-sm text-hd-gray uppercase tracking-wider mb-3">
@@ -103,7 +97,6 @@ export function StatsOverview({ onClose }: StatsOverviewProps) {
         </div>
       )}
 
-      {/* Session History */}
       {stats.sessions.length > 0 && (
         <div>
           <h3 className="font-heading text-sm text-hd-gray uppercase tracking-wider mb-3">
@@ -157,35 +150,30 @@ function DirectionHeatmap({ errors }: { errors: Record<Direction, number> }) {
   return (
     <div className="flex items-center justify-center">
       <svg width="160" height="160" viewBox="0 0 160 160">
-        {/* Up */}
         <rect x="55" y="10" width="50" height="50" rx="4"
           fill={`rgba(255,51,51,${0.1 + getIntensity('up') * 0.8})`}
           stroke="#2a2a3a" strokeWidth="1" />
         <text x="80" y="35" textAnchor="middle" fill="#e8e6e3" fontSize="10" fontFamily="Rajdhani">HAUT</text>
         <text x="80" y="50" textAnchor="middle" fill="#e8e6e3" fontSize="12" fontFamily="Orbitron">{errors.up}</text>
 
-        {/* Left */}
         <rect x="0" y="65" width="50" height="50" rx="4"
           fill={`rgba(255,51,51,${0.1 + getIntensity('left') * 0.8})`}
           stroke="#2a2a3a" strokeWidth="1" />
         <text x="25" y="90" textAnchor="middle" fill="#e8e6e3" fontSize="10" fontFamily="Rajdhani">GAUCHE</text>
         <text x="25" y="105" textAnchor="middle" fill="#e8e6e3" fontSize="12" fontFamily="Orbitron">{errors.left}</text>
 
-        {/* Right */}
         <rect x="110" y="65" width="50" height="50" rx="4"
           fill={`rgba(255,51,51,${0.1 + getIntensity('right') * 0.8})`}
           stroke="#2a2a3a" strokeWidth="1" />
         <text x="135" y="90" textAnchor="middle" fill="#e8e6e3" fontSize="10" fontFamily="Rajdhani">DROITE</text>
         <text x="135" y="105" textAnchor="middle" fill="#e8e6e3" fontSize="12" fontFamily="Orbitron">{errors.right}</text>
 
-        {/* Down */}
         <rect x="55" y="120" width="50" height="50" rx="4"
           fill={`rgba(255,51,51,${0.1 + getIntensity('down') * 0.8})`}
           stroke="#2a2a3a" strokeWidth="1" />
         <text x="80" y="145" textAnchor="middle" fill="#e8e6e3" fontSize="10" fontFamily="Rajdhani">BAS</text>
         <text x="80" y="160" textAnchor="middle" fill="#e8e6e3" fontSize="12" fontFamily="Orbitron">{errors.down}</text>
 
-        {/* Center */}
         <rect x="55" y="65" width="50" height="50" rx="4"
           fill="rgba(42,42,58,0.5)" stroke="#2a2a3a" strokeWidth="1" />
       </svg>
@@ -211,7 +199,6 @@ function AccuracyChart({ sessions }: { sessions: { accuracy: number; date: numbe
 
   return (
     <svg viewBox={`0 0 ${w} ${h}`} className="w-full" style={{ maxHeight: 150 }}>
-      {/* Grid lines */}
       {[0, 25, 50, 75, 100].map((v) => {
         const y = pad + (1 - v / 100) * (h - 2 * pad);
         return (
@@ -222,10 +209,8 @@ function AccuracyChart({ sessions }: { sessions: { accuracy: number; date: numbe
         );
       })}
 
-      {/* Line */}
       <path d={pathD} fill="none" stroke="#f5c518" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
 
-      {/* Dots */}
       {points.map((p, i) => (
         <circle key={i} cx={p.x} cy={p.y} r="3" fill="#f5c518" />
       ))}

@@ -37,7 +37,6 @@ export function GameOverScreen({
 
   const [copied, setCopied] = useState(false);
 
-  // Find fastest/slowest
   const successAttempts = attempts.filter((a) => a.success);
   const fastest = successAttempts.length > 0
     ? successAttempts.reduce((a, b) => (a.timeMs < b.timeMs ? a : b))
@@ -60,6 +59,7 @@ export function GameOverScreen({
 
   return (
     <motion.div
+      aria-live="polite"
       className="flex flex-col items-center gap-6 max-w-md mx-auto text-center"
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
@@ -85,7 +85,6 @@ export function GameOverScreen({
         </motion.div>
       )}
 
-      {/* Score */}
       <motion.div
         className="font-display text-6xl text-hd-yellow"
         initial={{ opacity: 0 }}
@@ -95,7 +94,6 @@ export function GameOverScreen({
         {score.toLocaleString()}
       </motion.div>
 
-      {/* Stats grid - staggered reveal */}
       <motion.div
         className="grid grid-cols-2 gap-4 w-full"
         initial="hidden"
@@ -116,7 +114,6 @@ export function GameOverScreen({
         )}
       </motion.div>
 
-      {/* Leaderboard mini */}
       {mode !== 'free-practice' && (
         <LeaderboardMini mode={mode} highlightScore={score} />
       )}

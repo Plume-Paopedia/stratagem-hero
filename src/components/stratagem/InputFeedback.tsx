@@ -9,7 +9,6 @@ interface InputFeedbackProps {
 export function InputFeedback({ successTrigger, errorTrigger, multiplier = 1 }: InputFeedbackProps) {
   const m = Math.min(multiplier, 4);
 
-  // Scale success flash intensity with multiplier
   const successOpacity = m === 1 ? 0.4 : m === 2 ? 0.5 : m === 3 ? 0.6 : 0.7;
   const successDuration = m === 1 ? 0.25 : m === 2 ? 0.3 : m === 3 ? 0.35 : 0.4;
   const successBg = m >= 4
@@ -35,7 +34,6 @@ export function InputFeedback({ successTrigger, errorTrigger, multiplier = 1 }: 
         )}
       </AnimatePresence>
 
-      {/* x4: Additional white-hot initial flash */}
       <AnimatePresence>
         {successTrigger > 0 && m >= 4 && (
           <motion.div
@@ -49,7 +47,6 @@ export function InputFeedback({ successTrigger, errorTrigger, multiplier = 1 }: 
         )}
       </AnimatePresence>
 
-      {/* x3+: Vignette inversion — edges flash brighter */}
       <AnimatePresence>
         {successTrigger > 0 && m >= 3 && (
           <motion.div

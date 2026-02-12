@@ -6,10 +6,6 @@ interface HellpodDropProps {
   multiplier?: number;
 }
 
-/**
- * Hellpod-style launch animation when a stratagem combo is completed.
- * Scales dramatically with streak multiplier.
- */
 export function HellpodDrop({ trigger, stratagemName, multiplier = 1 }: HellpodDropProps) {
   const m = Math.min(multiplier, 4);
   const isMax = m >= 4;
@@ -29,7 +25,6 @@ export function HellpodDrop({ trigger, stratagemName, multiplier = 1 }: HellpodD
           key={`hellpod-${trigger}`}
           className="fixed inset-x-0 top-0 pointer-events-none z-40 flex flex-col items-center pt-16"
         >
-          {/* x4: Full-screen white flash */}
           {isMax && (
             <motion.div
               className="fixed inset-0 bg-white"
@@ -39,7 +34,6 @@ export function HellpodDrop({ trigger, stratagemName, multiplier = 1 }: HellpodD
             />
           )}
 
-          {/* Radial flash */}
           <motion.div
             className="absolute top-12 rounded-full"
             style={{
@@ -52,7 +46,6 @@ export function HellpodDrop({ trigger, stratagemName, multiplier = 1 }: HellpodD
             transition={{ duration: duration * 0.7, ease: 'easeOut' }}
           />
 
-          {/* x2+: Expanding shockwave ring */}
           {m >= 2 && (
             <motion.div
               className="absolute top-14 rounded-full border-2 border-hd-yellow"
@@ -63,7 +56,6 @@ export function HellpodDrop({ trigger, stratagemName, multiplier = 1 }: HellpodD
             />
           )}
 
-          {/* x3+: Scanline burst — horizontal lines flash */}
           {isHigh && (
             <>
               {[0.3, 0.5, 0.7].map((yPos, i) => (
@@ -79,7 +71,6 @@ export function HellpodDrop({ trigger, stratagemName, multiplier = 1 }: HellpodD
             </>
           )}
 
-          {/* Arrow shooting up */}
           <motion.div
             className="absolute top-16"
             initial={{ y: 0, opacity: 1, scale: 1 }}
@@ -95,7 +86,6 @@ export function HellpodDrop({ trigger, stratagemName, multiplier = 1 }: HellpodD
             </svg>
           </motion.div>
 
-          {/* x3+: Arrow trail copies (motion blur) */}
           {isHigh && [1, 2, 3].map((i) => (
             <motion.div
               key={`trail-${i}`}
@@ -110,7 +100,6 @@ export function HellpodDrop({ trigger, stratagemName, multiplier = 1 }: HellpodD
             </motion.div>
           ))}
 
-          {/* Trail particles */}
           {Array.from({ length: particleCount }).map((_, i) => (
             <motion.div
               key={i}
@@ -135,7 +124,6 @@ export function HellpodDrop({ trigger, stratagemName, multiplier = 1 }: HellpodD
             />
           ))}
 
-          {/* CONFIRMED / ORBITAL CONFIRMED stamp */}
           <motion.div
             className={`${stampSize} font-display text-hd-yellow tracking-[0.3em] uppercase`}
             style={{
@@ -159,7 +147,6 @@ export function HellpodDrop({ trigger, stratagemName, multiplier = 1 }: HellpodD
             {stampText}
           </motion.div>
 
-          {/* x4: "HELL DIVE" subtitle */}
           {isMax && (
             <motion.div
               className="font-heading text-sm text-hd-red uppercase tracking-[0.2em] mt-0.5"
@@ -172,7 +159,6 @@ export function HellpodDrop({ trigger, stratagemName, multiplier = 1 }: HellpodD
             </motion.div>
           )}
 
-          {/* Stratagem name */}
           {stratagemName && (
             <motion.div
               className="font-heading text-xs text-hd-white/50 uppercase tracking-wider mt-1"

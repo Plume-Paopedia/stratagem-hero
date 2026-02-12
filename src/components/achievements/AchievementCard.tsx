@@ -34,7 +34,6 @@ export function AchievementCard({ def, progress }: AchievementCardProps) {
           {def.hidden && !unlocked ? 'Succes cache' : def.description}
         </div>
 
-        {/* Progress bar */}
         {def.maxProgress && !unlocked && (
           <div className="mt-2">
             <div className="h-1.5 bg-hd-border rounded-full overflow-hidden">

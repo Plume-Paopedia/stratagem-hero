@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 
 interface ProgressBarProps {
-  value: number; // 0-100
+  value: number;
   color?: string;
   height?: number;
   className?: string;
